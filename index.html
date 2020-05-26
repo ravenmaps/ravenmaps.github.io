@@ -1,0 +1,481 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>what to do in reydarfjordur - map</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.38.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.38.0/mapbox-gl.css' rel='stylesheet' />
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.1.1/mapbox-gl-geocoder.min.js'></script>
+    <div id='distance' class='distance-container'></div>
+
+<script src='https://api.mapbox.com/mapbox.js/plugins/turf/v2.0.2/turf.min.js'></script>
+    
+    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.1.1/mapbox-gl-geocoder.css' type='text/css' />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
+
+<style>
+    #menu {
+        background: #fff;
+        position: absolute;
+        z-index: 1;
+        top: 10px;
+        left: 10px;
+        border-radius: 3px;
+        width: 120px;
+        border: 1px solid rgba(0,0,0,0.4);
+        font-family: 'Open Sans', sans-serif;
+    }
+
+    #menu a {
+        font-size: 13px;
+        color: #404040;
+        display: block;
+        margin: 0;
+        padding: 0;
+        padding: 10px;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(0,0,0,0.25);
+        text-align: center;
+    }
+
+    #menu a:last-child {
+        border: none;
+    }
+
+    #menu a:hover {
+        background-color: #f8f8f8;
+        color: #404040;
+    }
+
+    #menu a.active {
+        background-color: #3887be;
+        color: #ffffff;
+    }
+
+    #menu a.active:hover {
+        background: #3074a4;
+    }
+   #marker {
+    background-image: url('https://www.mapbox.com/mapbox-gl-js/assets/washington-monument.jpg');
+    background-size: cover;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+
+<style>
+.mapboxgl-popup {
+    max-width: 400px;
+    font: 48px/50px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+}
+</style>
+
+
+<nav id="menu"></nav>
+
+<div id="map"></div>
+<style>
+    #fly_war {
+        display: block;
+        position: absolute;
+        bottom: 10px;
+        margin: 0px auto;
+        width: 10%;
+        height: 40px;
+        padding: 10px;
+        border: none;
+        border-radius: 3px;
+        font-size: 12px;
+        text-align: center;
+        color: #fff;
+        background: #ee8a65;
+    }
+</style>
+<button id='fly_war'>stríðsárasafnið</button>
+
+<style>
+    #fly {
+        display: block;
+        position: absolute;
+        bottom: 55px;
+        margin: 0px auto;
+        width: 10%;
+        height: 40px;
+        padding: 10px;
+        border: none;
+        border-radius: 3px;
+        font-size: 12px;
+        text-align: center;
+        color: #fff;
+        background: #ee8a65;
+    }
+</style>
+    
+
+<button id='fly'>hólmanes</button>
+
+<style>
+    #fly2 {
+        display: block;
+        position: absolute;
+        bottom: 100px;
+        margin: 0px auto;
+        width: 10%;
+        height: 40px;
+        padding: 10px;
+        border: none;
+        border-radius: 3px;
+        font-size: 12px;
+        text-align: center;
+        color: #fff;
+        background: #ee8a65;
+    }
+</style>
+<button id='fly2'>Kollur</button>
+<script>
+
+
+
+mapboxgl.accessToken = 'pk.eyJ1IjoidGh1bGVtYXBzIiwiYSI6ImNqM3F0Y2JnaDAxYnQzM28xZDVwazhhaDEifQ.pofHlcCOkr9OXfKsMYAAFw';
+var bounds = [
+    [-23.935227,63.394646], // Southwest coordinates
+    [-13.124680, 66.725298]  // Northeast coordinates
+];
+
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/thulemaps/cjx0f9ljf6gq91cqv6m9fylr2', 
+    zoom: 17,
+    center: [-14.207984,65.033518],
+    pitch: 155, // pitch in degrees
+    bearing: 30, // bearing in degrees,
+    maxBounds: bounds // Sets bounds as max
+});
+
+
+
+map.on('load', function () {
+     map.addSource('stadir', {
+        type: 'vector',
+        url: 'mapbox://thulemaps.cj626tka6142t2qo3gdf4yv4c-8rje7'
+    });
+    map.addLayer({
+        'id': 'stadir_layer',
+        'type': 'circle',
+        'source': 'stadir',
+        'layout': {
+            'visibility': 'visible'
+        },
+        'paint': {
+            'circle-radius': 8,
+            'circle-color': 'rgba(55,148,179,1)'
+        },
+        'source-layer': 'stadir'
+    });
+
+    map.addSource('poi', {
+        type: 'vector',
+        url: 'mapbox://styles/thulemaps/cj62xwmd6425s2ro5wr2c1w7k'
+    });
+    map.addLayer({
+        'id': 'poi',
+        'type': 'circle',
+        'source': 'poi',
+        'source-layer': 'poi',
+        
+    });
+  
+ map.addSource('contours', {
+        type: 'vector',
+        url: 'mapbox://mapbox.mapbox-terrain-v2'
+    });
+    map.addLayer({
+        'id': 'hæðarlínur_layer',
+        'type': 'line',
+        'source': 'contours',
+        'source-layer': 'contour',
+        'layout': {
+            'visibility': 'none',
+            'line-join': 'round',
+            'line-cap': 'round'
+        },
+        'paint': {
+            'line-color': '#877b59',
+            'line-width': 1
+        }
+    });
+    
+    
+ map.addSource('walking', {
+        type: 'vector',
+        url: 'mapbox://thulemaps.cj625ygac111m2qjxt6eg2w5q-1ecwg'
+    });
+    map.addLayer({
+        'id': 'walking_layer',
+        'type': 'line',
+        'source': 'walking',
+        'source-layer': 'walking',
+        'layout': {
+            'visibility': 'visible',
+            'line-join': 'round',
+            'line-cap': 'round'
+        },
+        'paint': {
+            'line-color': 'red',
+            'line-width': 5
+        }
+    });
+
+
+        
+
+
+    map.addSource('byggingar', {
+        type: 'vector',
+        url: 'mapbox://thulemaps.cj626ffaw13cl2wp8ztjt31il-7dm5g'
+    });
+    map.addLayer({
+        'id': 'byggingar_layer',
+        'type': 'fill',
+        'source': 'byggingar',
+        'source-layer': 'byggingar',
+        'layout': {
+            'visibility': 'visible',
+            
+        },
+        'paint': {
+            'fill-color': 'rgba(200, 100, 240, 0.4)',
+            'fill-outline-color': 'rgba(200, 100, 240, 1)'
+        }
+    
+     
+    });
+   
+
+    //3d byggingar
+    map.addSource('3d buildings', {
+        type: 'vector',
+        
+    });
+    map.addLayer({
+        'id': '3d_layer',
+        'source': 'composite',
+        'source-layer': 'building',
+        'filter': ['==', 'extrude', 'true'],
+        'type': 'fill-extrusion',
+        'minzoom': 10,
+        'layout': {
+            'visibility': 'visible'
+        },
+        'paint': {
+            'fill-extrusion-color': '#FFFFFF',
+            'fill-extrusion-height': {
+                'type': 'identity',
+                'property': 'height'
+            },
+            'fill-extrusion-base': {
+                'type': 'identity',
+                'property': 'min_height'
+            },
+            'fill-extrusion-opacity': .5
+        }
+   
+    });
+    
+
+   
+    
+ 
+    
+    // Add zoom and rotation controls to the map.
+map.addControl(new mapboxgl.NavigationControl());
+
+// Add zoom and rotation controls to the map.
+map.addControl(new mapboxgl.FullscreenControl());
+map.addControl(new MapboxGeocoder({
+    accessToken: mapboxgl.accessToken,
+    bbox: [-23.935227,63.394646,-13.124680, 66.725298],
+    
+}));
+
+
+
+
+});
+
+// layers uppi til vinstri
+var toggleableLayerIds = ['byggingar_layer', 'walking_layer', 'stadir_layer', '3d_layer', 'hæðarlínur_layer', 'poi', 'wms-test-layer', 'MesssgeTest'];
+
+for (var i = 0; i < toggleableLayerIds.length; i++) {
+    var id = toggleableLayerIds[i];
+
+    var link = document.createElement('a');
+    link.href = '#';
+    link.className = 'active';
+    link.textContent = id;
+
+    link.onclick = function (e) {
+        var clickedLayer = this.textContent;
+        e.preventDefault();
+        e.stopPropagation();
+
+        var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
+
+        if (visibility === 'visible') {
+            map.setLayoutProperty(clickedLayer, 'visibility', 'none');
+            this.className = '';
+        } else {
+            this.className = 'active';
+            map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
+        }
+    };
+
+    var layers = document.getElementById('menu');
+    layers.appendChild(link);
+}
+// Add geolocate control to the map.
+map.addControl(new mapboxgl.GeolocateControl({
+    positionOptions: {
+        enableHighAccuracy: true
+    },
+    trackUserLocation: true
+    
+
+
+
+}));
+
+ 
+
+ 
+
+    // When a click event occurs on a feature in the states layer, open a popup at the
+    // location of the click, with description HTML from its properties.
+    map.on('click', 'stadir_layer', function (e) {
+        new mapboxgl.Popup()
+            .setLngLat(e.lngLat)
+            .setHTML(e.features[0].properties.Heiti)
+            .addTo(map);
+    });
+document.getElementById('fly').addEventListener('click', function () {
+    //fly to coordinates
+    map.flyTo({
+        center: [
+            -14.008641,
+              65.045055],
+               speed: 0.9,
+               zoom: 17,
+               bearing: 270, // bearing in degrees,
+    });
+    
+});
+document.getElementById('fly2').addEventListener('click', function () {
+    //fly to coordinates
+    map.flyTo({
+        center: [
+            -14.254168,
+              65.033935],
+               speed: 0.7,
+               zoom: 18,
+               bearing: 60, // bearing in degrees,
+               
+    });
+});
+document.getElementById('fly_war').addEventListener('click', function () {
+    //fly to coordinates
+    map.flyTo({
+        center: [
+            -14.208739,
+              65.038046],
+              zoom: 17,
+               speed: 0.8,
+               bearing: 60, // bearing in degrees,
+    });
+
+
+ });
+ 
+var distanceContainer = document.getElementById('distance');
+
+// GeoJSON object to hold our measurement features
+var geojson = {
+    "type": "FeatureCollection",
+    "features": []
+};
+
+// Used to draw a line between points
+var linestring = {
+    "type": "Feature",
+    "geometry": {
+        "type": "LineString",
+        "coordinates": []
+    }
+};
+
+map.on('load', function() {
+    map.addSource('geojson', {
+        "type": "geojson",
+        "data": geojson
+    });
+
+    // Add styles to the map
+    map.addLayer({
+        id: 'measure-points',
+        type: 'circle',
+        source: 'geojson',
+        paint: {
+            'circle-radius': 5,
+            'circle-color': '#000'
+        },
+        filter: ['in', '$type', 'Point']
+    });
+    map.addLayer({
+        id: 'measure-lines',
+        type: 'line',
+        source: 'geojson',
+        layout: {
+            'line-cap': 'round',
+            'line-join': 'round'
+        },
+        paint: {
+            'line-color': '#000',
+            'line-width': 2.5
+        },
+        filter: ['in', '$type', 'LineString']
+    });
+
+    
+});
+</script>
+ 
+ 
+ 
+ 
+</script>
+
+
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
