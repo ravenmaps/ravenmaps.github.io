@@ -282,7 +282,7 @@ for (var i = 0; i < toggleableLayerIds.length; i++) {
     map.on('click', 'walking_layer', function (e) {
         new mapboxgl.Popup()
             .setLngLat(e.lngLat)
-            .setHTML(e.features[0].properties.Nafn)
+            .setHTML(e.features[0].properties.Name)
             .addTo(map);
     });
 
