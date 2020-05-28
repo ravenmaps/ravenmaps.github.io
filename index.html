@@ -1,50 +1,117 @@
-
-
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset='utf-8' />
     <title></title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-   // <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.33.1/mapbox-gl.js'></script>
-    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
-     <script src="/kort/leaflet/leaflet.measurecontrol.js"></script>
-      <link rel="stylesheet" href="/kort/leaflet/leaflet.measurecontrol.css" />
-    //<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.33.1/mapbox-gl.css' rel='stylesheet' />
-     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.css' rel='stylesheet' />
     <style>
         body { margin:0; padding:0; }
         #map { position:absolute; top:0; bottom:0; width:100%; }
     </style>
 </head>
 <body>
-<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.0.1/mapbox-gl-geocoder.js'></script>
-<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.0.1/mapbox-gl-geocoder.css' type='text/css' />
-<div id='map'></div>
 
-<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v3.1.1/mapbox-gl-directions.js'></script>
-<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v3.1.1/mapbox-gl-directions.css' type='text/css' />
+<style>
+    #menu {
+        background: #fff;
+        position: absolute;
+        z-index: 1;
+        top: 10px;
+        right: 10px;
+        border-radius: 3px;
+        width: 120px;
+        border: 1px solid rgba(0,0,0,0.4);
+        font-family: 'Open Sans', sans-serif;
+    }
+
+    #menu a {
+        font-size: 13px;
+        color: #404040;
+        display: block;
+        margin: 0;
+        padding: 0;
+        padding: 10px;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(0,0,0,0.25);
+        text-align: center;
+    }
+
+    #menu a:last-child {
+        border: none;
+    }
+
+    #menu a:hover {
+        background-color: #f8f8f8;
+        color: #404040;
+    }
+
+    #menu a.active {
+        background-color: #3887be;
+        color: #ffffff;
+    }
+
+    #menu a.active:hover {
+        background: #3074a4;
+    }
+</style>
+
+<nav id="menu"></nav>
+<div id="map"></div>
 
 <script>
 mapboxgl.accessToken = 'pk.eyJ1Ijoic2pvbm5pMTEiLCJhIjoiVHQ4MmJQNCJ9.nIM72uIZdTzn1Q-G0ObG7A';
 var map = new mapboxgl.Map({
-    style: 'mapbox://styles/sjonni11/cj0i2r81e00552rlbh71tbd8e',
-    center: [151.206391, -33.880637],
-    zoom: 17,
-    pitch: 80,
-    bearing: 0,
-    container: 'map'
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v9',
+    zoom: 2,
+    center: [151, -33.517379300798098]
 });
 
-// the 'building' layer in the mapbox-streets vector source contains building-height
-// data from OpenStreetMap.
-map.on('load', function() {
+map.on('load', function () {
+    map.addSource('LightRailStations', {
+        type: 'vector',
+        url: 'mapbox://sjonni11.cj3f36g8900dx33pcfpb3ou23-31soi'
+    });
     map.addLayer({
+        'id': 'LightRailStations',
+        'type': 'circle',
+        'source': 'LightRailStations',
+        'layout': {
+            'visibility': 'visible'
+        },
+        'paint': {
+            'circle-radius': 4,
+            'circle-color': 'rgba(140,148,179,1)'
+        },
+        'source-layer': 'LightRailStations'
+    });
+
+     map.addSource("quakes", {
+       "type": "geojson",
+       "data": "http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson"
+   });
+
+   // Once you have a datasource defined, you need to add a layer from that data source to the map.
+   // We could, for example, add only earthquakes magnitude 4.0+. Here we just tell it
+   // to take all of the data and style it as a circle.
+   map.addLayer({
+     "id": "quakes", // An id for this layer
+     "type": "circle", // As a point layer, we need style a symbol for each point.
+     "source": "quakes", // The source layer we defined above
+     "paint": {
+         "circle-radius": 10,
+         "circle-color": "#ff0000"
+     }
+   });
+map.addLayer({
         'id': '3d-buildings',
         'source': 'composite',
         'source-layer': 'building',
         'filter': ['==', 'extrude', 'true'],
         'type': 'fill-extrusion',
-        'minzoom': 14,
+        'minzoom': 15,
         'paint': {
             'fill-extrusion-color': '#aaa',
             'fill-extrusion-height': {
@@ -58,25 +125,37 @@ map.on('load', function() {
             'fill-extrusion-opacity': .6
         }
     });
-    
 });
 
+var toggleableLayerIds = [ 'quakes', 'LightRailStations' ];
 
-//Geocoder top left
+for (var i = 0; i < toggleableLayerIds.length; i++) {
+    var id = toggleableLayerIds[i];
 
-map.addControl(new MapboxGeocoder({
-  accessToken: 'pk.eyJ1Ijoic2pvbm5pMTEiLCJhIjoiVHQ4MmJQNCJ9.nIM72uIZdTzn1Q-G0ObG7A'  
-}), 'top-left');
+    var link = document.createElement('a');
+    link.href = '#';
+    link.className = 'active';
+    link.textContent = id;
 
+    link.onclick = function (e) {
+        var clickedLayer = this.textContent;
+        e.preventDefault();
+        e.stopPropagation();
 
-//navigation
-map.addControl(new MapboxDirections({
-  accessToken: 'pk.eyJ1Ijoic2pvbm5pMTEiLCJhIjoiVHQ4MmJQNCJ9.nIM72uIZdTzn1Q-G0ObG7A'  
-}), 'bottom-left');
+        var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
 
+        if (visibility === 'visible') {
+            map.setLayoutProperty(clickedLayer, 'visibility', 'none');
+            this.className = '';
+        } else {
+            this.className = 'active';
+            map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
+        }
+    };
 
-//map controls top right
-map.addControl(new mapboxgl.NavigationControl());
+    var layers = document.getElementById('menu');
+    layers.appendChild(link);
+}
 
 
 </script>
