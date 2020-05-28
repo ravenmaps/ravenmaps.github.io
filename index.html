@@ -1,11 +1,12 @@
+
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset='utf-8' />
-    <title></title>
+    <title>Reyðarfjörður</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js'></script>
-    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.css' rel='stylesheet' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.38.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.38.0/mapbox-gl.css' rel='stylesheet' />
     <style>
         body { margin:0; padding:0; }
         #map { position:absolute; top:0; bottom:0; width:100%; }
@@ -19,7 +20,7 @@
         position: absolute;
         z-index: 1;
         top: 10px;
-        right: 10px;
+        left: 10px;
         border-radius: 3px;
         width: 120px;
         border: 1px solid rgba(0,0,0,0.4);
@@ -55,63 +56,166 @@
     #menu a.active:hover {
         background: #3074a4;
     }
+   #marker {
+    background-image: url('https://www.mapbox.com/mapbox-gl-js/assets/washington-monument.jpg');
+    background-size: cover;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+
+<style>
+.mapboxgl-popup {
+    max-width: 400px;
+    font: 48px/50px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+}
 </style>
+
 
 <nav id="menu"></nav>
 <div id="map"></div>
 
+
+<style>
+    #fly {
+        display: block;
+        position: relative;
+        margin: 0px auto;
+        width: 50%;
+        height: 40px;
+        padding: 10px;
+        border: none;
+        border-radius: 3px;
+        font-size: 12px;
+        text-align: center;
+        color: #fff;
+        background: #ee8a65;
+    }
+</style>
+
 <script>
-mapboxgl.accessToken = 'pk.eyJ1Ijoic2pvbm5pMTEiLCJhIjoiVHQ4MmJQNCJ9.nIM72uIZdTzn1Q-G0ObG7A';
+
+
+
+mapboxgl.accessToken = 'pk.eyJ1IjoidGh1bGVtYXBzIiwiYSI6ImNqM3F0Y2JnaDAxYnQzM28xZDVwazhhaDEifQ.pofHlcCOkr9OXfKsMYAAFw';
 var map = new mapboxgl.Map({
     container: 'map',
-    style: 'mapbox://styles/mapbox/streets-v9',
-    zoom: 2,
-    center: [151, -33.517379300798098]
+    style: 'mapbox://styles/mapbox/satellite-streets-v10',
+    zoom: 15,
+    center: [-14.213004,65.037052],
+    pitch: 60, // pitch in degrees
+    bearing: 30, // bearing in degrees
 });
 
 map.on('load', function () {
-    map.addSource('LightRailStations', {
+     map.addSource('stadir', {
         type: 'vector',
-        url: 'mapbox://sjonni11.cj3f36g8900dx33pcfpb3ou23-31soi'
+        url: 'mapbox://thulemaps.cj626tka6142t2qo3gdf4yv4c-8rje7'
     });
     map.addLayer({
-        'id': 'LightRailStations',
+        'id': 'stadir_layer',
         'type': 'circle',
-        'source': 'LightRailStations',
+        'source': 'stadir',
         'layout': {
             'visibility': 'visible'
         },
         'paint': {
-            'circle-radius': 8,
-            'circle-color': 'rgba(140,148,179,1)'
+            'circle-radius': 5,
+            'circle-color': 'rgba(55,48,179,1)'
         },
-        'source-layer': 'LightRailStations'
+        'source-layer': 'stadir'
     });
 
-     map.addSource("quakes", {
-       "type": "geojson",
-       "data": "http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson"
-   });
+    map.addSource('poi', {
+        type: 'vector',
+        url: 'mapbox://styles/thulemaps/cj62xwmd6425s2ro5wr2c1w7k'
+    });
+    map.addLayer({
+        'id': 'poi',
+        'type': 'circle',
+        'source': 'poi',
+        'source-layer': 'poi',
+        
+    });
+  
+ map.addSource('contours', {
+        type: 'vector',
+        url: 'mapbox://mapbox.mapbox-terrain-v2'
+    });
+    map.addLayer({
+        'id': 'hæðarlínur_layer',
+        'type': 'line',
+        'source': 'contours',
+        'source-layer': 'contour',
+        'layout': {
+            'visibility': 'none',
+            'line-join': 'round',
+            'line-cap': 'round'
+        },
+        'paint': {
+            'line-color': '#877b59',
+            'line-width': 1
+        }
+    });
+ map.addSource('walking', {
+        type: 'vector',
+        url: 'mapbox://thulemaps.cj625ygac111m2qjxt6eg2w5q-1ecwg'
+    });
+    map.addLayer({
+        'id': 'walking_layer',
+        'type': 'line',
+        'source': 'walking',
+        'source-layer': 'walking',
+        'layout': {
+            'visibility': 'visible',
+            'line-join': 'round',
+            'line-cap': 'round'
+        },
+        'paint': {
+            'line-color': 'red',
+            'line-width': 2
+        }
+    });
+    
+    map.addSource('byggingar', {
+        type: 'vector',
+        url: 'mapbox://thulemaps.cj626ffaw13cl2wp8ztjt31il-7dm5g'
+    });
+    map.addLayer({
+        'id': 'byggingar_layer',
+        'type': 'fill',
+        'source': 'byggingar',
+        'source-layer': 'byggingar',
+        'layout': {
+            'visibility': 'visible',
+            
+        },
+        'paint': {
+            'fill-color': 'rgba(200, 100, 240, 0.4)',
+            'fill-outline-color': 'rgba(200, 100, 240, 1)'
+        }
+    
+     
+    });
+   
 
-   // Once you have a datasource defined, you need to add a layer from that data source to the map.
-   // We could, for example, add only earthquakes magnitude 4.0+. Here we just tell it
-   // to take all of the data and style it as a circle.
-   map.addLayer({
-     "id": "quakes", // An id for this layer
-     "type": "circle", // As a point layer, we need style a symbol for each point.
-     "source": "quakes", // The source layer we defined above
-     "paint": {
-         "circle-radius": 10,
-         "circle-color": "#ff0000"
-     }
-   });
-map.addLayer({
-        'id': '3d-buildings',
+    //3d byggingar
+    map.addSource('3d buildings', {
+        type: 'vector',
+        
+    });
+    map.addLayer({
+        'id': '3d_layer',
         'source': 'composite',
         'source-layer': 'building',
         'filter': ['==', 'extrude', 'true'],
         'type': 'fill-extrusion',
-        'minzoom': 15,
+        'minzoom': 10,
+        'layout': {
+            'visibility': 'visible'
+        },
         'paint': {
             'fill-extrusion-color': '#aaa',
             'fill-extrusion-height': {
@@ -124,10 +228,23 @@ map.addLayer({
             },
             'fill-extrusion-opacity': .6
         }
+   
     });
+    
+    
+ 
+    
+    // Add zoom and rotation controls to the map.
+map.addControl(new mapboxgl.NavigationControl());
+
+// Add zoom and rotation controls to the map.
+map.addControl(new mapboxgl.FullscreenControl());
+
+
 });
 
-var toggleableLayerIds = [ 'quakes', 'LightRailStations' ];
+// layers uppi til vinstri
+var toggleableLayerIds = [ 'byggingar_layer', 'walking_layer', 'stadir_layer', '3d_layer', 'hæðarlínur_layer', 'poi', 'wms-test-layer', 'MesssgeTest'];
 
 for (var i = 0; i < toggleableLayerIds.length; i++) {
     var id = toggleableLayerIds[i];
@@ -158,7 +275,22 @@ for (var i = 0; i < toggleableLayerIds.length; i++) {
 }
 
 
+ 
+
+    // When a click event occurs on a feature in the states layer, open a popup at the
+    // location of the click, with description HTML from its properties.
+    map.on('click', 'stadir_layer', function (e) {
+        new mapboxgl.Popup()
+            .setLngLat(e.lngLat)
+            .setHTML(e.features[0].properties.Heiti)
+            .addTo(map);
+    });
+
+
+
 </script>
+
+
 
 </body>
 </html>
