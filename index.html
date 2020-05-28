@@ -1,161 +1,49 @@
-<!DOCTYPE html>
+
 <html>
 <head>
-    <meta charset='utf-8' />
-    <title></title>
-    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js'></script>
-    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.css' rel='stylesheet' />
-    <style>
-        body { margin:0; padding:0; }
-        #map { position:absolute; top:0; bottom:0; width:100%; }
-    </style>
+  <meta charset=utf-8 />
+  <title>LPI test</title>
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+
+  <!-- Load Leaflet from CDN-->
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/leaflet/0.7.3/leaflet.css" />
+  <link rel="stylesheet" href="/kort/../kort/leaflet/Control.Coordinates.css" />
+  <script src="//cdn.jsdelivr.net/leaflet/0.7.3/leaflet.js"></script>
+
+  <!-- Load Esri Leaflet from CDN -->
+  <script src="//cdn.jsdelivr.net/leaflet.esri/1.0.0/esri-leaflet.js"></script>
+  <script src="/kort/../kort/leaflet/Control.Coordinates.js"></script>
+
+      
+
+
+  <style>
+    body { margin:0; padding:0; }
+    #map { position: absolute; top:0; bottom:0; right:0; left:0; }
+  </style>
 </head>
 <body>
 
-<style>
-    #menu {
-        background: #fff;
-        position: absolute;
-        z-index: 1;
-        top: 10px;
-        right: 10px;
-        border-radius: 3px;
-        width: 120px;
-        border: 1px solid rgba(0,0,0,0.4);
-        font-family: 'Open Sans', sans-serif;
-    }
-
-    #menu a {
-        font-size: 13px;
-        color: #404040;
-        display: block;
-        margin: 0;
-        padding: 0;
-        padding: 10px;
-        text-decoration: none;
-        border-bottom: 1px solid rgba(0,0,0,0.25);
-        text-align: center;
-    }
-
-    #menu a:last-child {
-        border: none;
-    }
-
-    #menu a:hover {
-        background-color: #f8f8f8;
-        color: #404040;
-    }
-
-    #menu a.active {
-        background-color: #3887be;
-        color: #ffffff;
-    }
-
-    #menu a.active:hover {
-        background: #3074a4;
-    }
-</style>
-
-<nav id="menu"></nav>
 <div id="map"></div>
 
 <script>
-mapboxgl.accessToken = 'pk.eyJ1Ijoic2pvbm5pMTEiLCJhIjoiVHQ4MmJQNCJ9.nIM72uIZdTzn1Q-G0ObG7A';
-var map = new mapboxgl.Map({
-    container: 'map',
-    style: 'mapbox://styles/mapbox/streets-v9',
-    zoom: 2,
-    center: [151, -33.517379300798098]
-});
+  var map = L.map('map').setView([-33.8679,151.2074], 15);
 
-map.on('load', function () {
-    map.addSource('LightRailStations', {
-        type: 'vector',
-        url: 'mapbox://sjonni11.cj3f36g8900dx33pcfpb3ou23-31soi'
-    });
-    map.addLayer({
-        'id': 'LightRailStations',
-        'type': 'circle',
-        'source': 'LightRailStations',
-        'layout': {
-            'visibility': 'visible'
-        },
-        'paint': {
-            'circle-radius': 4,
-            'circle-color': 'rgba(140,148,179,1)'
-        },
-        'source-layer': 'LightRailStations'
-    });
+  L.esri.tiledMapLayer({
+    url: "http://maps.six.nsw.gov.au/arcgis/rest/services/public/NSW_Topo_Map/MapServer",
+    detectRetina: true
+  }).addTo(map);
+//NSW_Base_Map
 
-     map.addSource("quakes", {
-       "type": "geojson",
-       "data": "http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson"
-   });
 
-   // Once you have a datasource defined, you need to add a layer from that data source to the map.
-   // We could, for example, add only earthquakes magnitude 4.0+. Here we just tell it
-   // to take all of the data and style it as a circle.
-   map.addLayer({
-     "id": "quakes", // An id for this layer
-     "type": "circle", // As a point layer, we need style a symbol for each point.
-     "source": "quakes", // The source layer we defined above
-     "paint": {
-         "circle-radius": 10,
-         "circle-color": "#ff0000"
-     }
-   });
-map.addLayer({
-        'id': '3d-buildings',
-        'source': 'composite',
-        'source-layer': 'building',
-        'filter': ['==', 'extrude', 'true'],
-        'type': 'fill-extrusion',
-        'minzoom': 15,
-        'paint': {
-            'fill-extrusion-color': '#aaa',
-            'fill-extrusion-height': {
-                'type': 'identity',
-                'property': 'height'
-            },
-            'fill-extrusion-base': {
-                'type': 'identity',
-                'property': 'min_height'
-            },
-            'fill-extrusion-opacity': .6
-        }
-    });
-});
+var c = new L.Control.Coordinates();
+    	c.addTo(map);
 
-var toggleableLayerIds = [ 'quakes', 'LightRailStations' ];
+		function onMapClick(e) {
+			c.setCoordinates(e);
+		}
 
-for (var i = 0; i < toggleableLayerIds.length; i++) {
-    var id = toggleableLayerIds[i];
-
-    var link = document.createElement('a');
-    link.href = '#';
-    link.className = 'active';
-    link.textContent = id;
-
-    link.onclick = function (e) {
-        var clickedLayer = this.textContent;
-        e.preventDefault();
-        e.stopPropagation();
-
-        var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
-
-        if (visibility === 'visible') {
-            map.setLayoutProperty(clickedLayer, 'visibility', 'none');
-            this.className = '';
-        } else {
-            this.className = 'active';
-            map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
-        }
-    };
-
-    var layers = document.getElementById('menu');
-    layers.appendChild(link);
-}
+		map.on('click', onMapClick);
 
 
 </script>
