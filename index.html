@@ -175,7 +175,7 @@ map.on('load', function () {
         },
         'paint': {
             'line-color': 'red',
-            'line-width': 2
+            'line-width': 4
         }
     });
     
@@ -279,10 +279,10 @@ for (var i = 0; i < toggleableLayerIds.length; i++) {
 
     // When a click event occurs on a feature in the states layer, open a popup at the
     // location of the click, with description HTML from its properties.
-    map.on('click', 'stadir_layer', function (e) {
+    map.on('click', 'walking_layer', function (e) {
         new mapboxgl.Popup()
             .setLngLat(e.lngLat)
-            .setHTML(e.features[0].properties.Heiti)
+            .setHTML(e.features[0].properties.Nafn)
             .addTo(map);
     });
 
