@@ -108,6 +108,18 @@ var map = new mapboxgl.Map({
     pitch: 0, // pitch in degrees
     bearing: 0, // bearing in degrees
 });
+    
+    
+ 
+// Add geolocate control to the map.
+map.addControl(
+new mapboxgl.GeolocateControl({
+positionOptions: {
+enableHighAccuracy: true
+},
+trackUserLocation: true
+})
+});
 
 map.on('load', function () {
      map.addSource('stadir', {
