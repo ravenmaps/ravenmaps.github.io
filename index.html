@@ -20,8 +20,7 @@
         body { margin:0; padding:0; }
         #map { position:absolute; top:0; bottom:0; width:100%; }
 		
-		<script src='mapbox-gl-traffic.js'></script>
-    <link href='mapbox-gl-traffic.css' rel='stylesheet' />
+	
     </style>
 </head>
 <body>
@@ -159,7 +158,7 @@ var bounds = [
 
 var map = new mapboxgl.Map({
     container: 'map',
-    style: 'mapbox://styles/thulemaps/cjx0f9ljf6gq91cqv6m9fylr2', 
+    style: 'mapbox://styles/thulemaps/ck3ssyku9259m1ck6r6l07reu', 
     zoom: 9,
     center: [151.0565,-33.8791],
     pitch: 0, // pitch in degrees
@@ -468,7 +467,7 @@ map.on('load', function() {
     
 });
 
-map.addControl(new MapboxTraffic());
+
 </script>
  
  
