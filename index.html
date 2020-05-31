@@ -4,11 +4,13 @@
 <html>
 <head>
     <meta charset='utf-8' />
-    <title>what to do in reydarfjordur - map</title>
+    <title>map map map</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.38.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.38.0/mapbox-gl.css' rel='stylesheet' />
     <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.1.1/mapbox-gl-geocoder.min.js'></script>
+	
+
     <div id='distance' class='distance-container'></div>
 
 <script src='https://api.mapbox.com/mapbox.js/plugins/turf/v2.0.2/turf.min.js'></script>
@@ -17,6 +19,9 @@
     <style>
         body { margin:0; padding:0; }
         #map { position:absolute; top:0; bottom:0; width:100%; }
+		
+		<script src='mapbox-gl-traffic.js'></script>
+    <link href='mapbox-gl-traffic.css' rel='stylesheet' />
     </style>
 </head>
 <body>
@@ -177,8 +182,8 @@ map.on('load', function () {
             'visibility': 'visible'
         },
         'paint': {
-            'circle-radius': 8,
-            'circle-color': 'rgba(55,148,179,1)'
+            'circle-radius': 4,
+            'circle-color': 'rgba(55,55,179,1)'
         },
         'source-layer': 'stadir'
     });
@@ -211,7 +216,7 @@ map.on('load', function () {
         },
         'paint': {
             'line-color': '#877b59',
-            'line-width': 1
+            'line-width': 1.5
         }
     });
     
@@ -287,7 +292,7 @@ map.on('load', function () {
                 'type': 'identity',
                 'property': 'min_height'
             },
-            'fill-extrusion-opacity': .5
+            'fill-extrusion-opacity': .7
         }
    
     });
@@ -300,12 +305,16 @@ map.on('load', function () {
     // Add zoom and rotation controls to the map.
 map.addControl(new mapboxgl.NavigationControl());
 
+// Add traffic controls to the map.
+
+
 // Add zoom and rotation controls to the map.
 map.addControl(new mapboxgl.FullscreenControl());
 map.addControl(new MapboxGeocoder({
     accessToken: mapboxgl.accessToken,
-    bbox: [-23.935227,63.394646,-13.124680, 66.725298],
-    
+    bbox: [139.261, -36.507,156.43, -26.93],
+ 
+
 }));
 
 
@@ -314,7 +323,7 @@ map.addControl(new MapboxGeocoder({
 });
 
 // layers uppi til vinstri
-var toggleableLayerIds = ['byggingar_layer', 'walking_layer', 'stadir_layer', '3d_layer', 'hæðarlínur_layer', 'poi', 'wms-test-layer', 'MesssgeTest'];
+var toggleableLayerIds = ['byggingar_layer', 'walking_layer', 'stadir_layer', '3d_layer', 'hæðarlínur_layer', 'poi'];
 
 for (var i = 0; i < toggleableLayerIds.length; i++) {
     var id = toggleableLayerIds[i];
@@ -458,6 +467,8 @@ map.on('load', function() {
 
     
 });
+
+map.addControl(new MapboxTraffic());
 </script>
  
  
