@@ -348,7 +348,7 @@ map.addControl(new mapboxgl.GeolocateControl({
     map.on('click', 'cycle pop up', function (e) {
         new mapboxgl.Popup()
             .setLngLat(e.lngLat)
-            .setHTML(e.features[0].properties.Shape_Length)
+            .setHTML(e.features[0].properties.Name)
             .addTo(map);
     });
 document.getElementById('fly').addEventListener('click', function () {
