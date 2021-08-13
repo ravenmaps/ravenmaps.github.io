@@ -454,7 +454,8 @@ map.addSource('mapbox-dem', {
 'type': 'raster-dem',
 'url': 'http://www.thulemaps.com/budareyri/{z}/{x}/{y}.png',
 'tileSize': 256,
-'maxzoom': 14
+'maxzoom': 14,
+ 'encoding': "terrarium",
 });
 // add the DEM source as a terrain layer with exaggerated height
 map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.0 });
