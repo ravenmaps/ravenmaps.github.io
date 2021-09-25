@@ -1,236 +1,409 @@
+
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>
-            Mitt Kort
-        </title>
-        <!-- Leaflet -->
-        <link rel="stylesheet" href="lib/leaflet/leaflet.css" />
-        <link rel="stylesheet" href="lib/leaflet/leaflet.label.css" />
-        <link rel="stylesheet" href="lib/leaflet/Control.Coordinates.css" />
-     <link rel="stylesheet" href="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.css" />
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="lib/leaflet/L.Control.Locate.min.css" />
+<head>
+    <title>Reyðarfjörður!</title>
+    <link rel="shortcut icon" href="/kort/leaflet/favicon.ico" type="image/x-icon" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+<link rel="stylesheet" href="../leaflet/dist/L.Control.Locate.min.css" />
+
+	<style>
+		html, body, #map { height:100%; width:100%; padding:0px; margin:0px; }
+	
+        
+	</style>
+</head>
+<body>
+	<div id="map"></div>
+ 	<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+ 	<script src="../leaflet/src/L.Control.Locate.js"></script>
+     <script src="../leaflet/World.geojson" type="text/javascript"></script>
      
-     <script src="lib/leaflet/leaflet.js"></script>
-        <script src="lib/leaflet/leaflet.label.js"></script>
-        <script src="http://maps.google.com/maps/api/js?v=3&sensor=false"></script>
-        <script src="lib/leaflet/Google.js"></script>
-        <script src="data/countries.geojson"></script>
-        <script src="lib/leaflet/Control.Coordinates.js"></script>
-<script src="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.js"></script>
-<script src="lib/leaflet/L.Control.Locate.js"></script>
 
-        <style type="text/css">
-        #map { height : 600px; }
+	<script>
 
-            .legend { background : white; line-height : 1.5em}
-            .legend i { width : 5em; float : left }
-            .map-label { background : yellow }
-        </style>
-    </head>
-    <body>
-        <h1>map resource</h1>
-        <div id="map"></div>
-        <script>
-            var countriesLayer;
-            
-            function highlightFeature(e){
-                var layer = e.target;
-                layer.setStyle(
-                    {
-                        weight : 5,
-                        color : 'black',
-                        fillColor : 'white',
-                        fillOpacity : 0.2
-                    }
-                );
-                if(!L.Browser.ie && !L.Browser.opera){
-                    layer.bringToFront();
-                }
-            }
-            
-            function resetHighlight(e){
-                countriesLayer.resetStyle(e.target);
-            }
-            
-            function zoomToFeature(e){
-                map.fitBounds(e.target.getBounds());
-            }
-            
-            var markers = new Array();
-            function countriesOnEachFeature(feature, layer){
-                markers.push(
-                    L.circleMarker(
-                        layer.getBounds().getCenter(),
-                        {
-                            radius : 0.0,
-                            opacity : 0,
-                            fillOpacity : 0
-                        }
-                    )
-                );
-                var markersCount = markers.length;
-                markers[markersCount - 1].bindLabel(
-                    feature.properties.pop_est.toString(),
-                    {
-                            noHide : true,
-                            className : 'map-label',
-                            pane : 'mapPane'
-                    }
-                );
-                markers[markersCount - 1].addTo(map);
-                markers[markersCount - 1].hideLabel();
-                
-                layer.on(
-                    {
-                        mouseover : highlightFeature,
-                        mouseout : resetHighlight,
-                        click : zoomToFeature
-                    }
-                );
-            }
-            
-            function getCountryColor(popEst){
-                if(popEst > 100000000){
-                    return 'red';
-                }else if(popEst > 50000000){
-                    return 'blue';
-                }else{
-                    return 'purple';
-                }
-                
-            }
-            
-            function countriesStyle(feature){
-                return {
-                    fillColor : getCountryColor(feature.properties.popEst),
-                    weight : 2,
-                    opacity : 1,
-                    color : 'white',
-                    dashArray : 3,
-                    fillOpacity : 0.7
-                }
-            }
-            
-            var map = L.map('map').setView([-33.9835,150.7946], 13);
-            var osm= L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'
-}).addTo(map);
+    
 
+		// Build different tile layers (the id is what switchs between different mapbox tiles)
+		var Thunderforest_cycle = L.tileLayer('http://{s}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="http://www.opencyclemap.org">OpenCycleMap</a>, &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'
+});
+			  nokia_aerial = L.tileLayer('http://{s}.{base}.maps.cit.api.here.com/maptile/2.1/maptile/{mapID}/satellite.day/{z}/{x}/{y}/256/png8?app_id={app_id}&app_code={app_code}', {
+                  attribution: 'Map &copy; 1987-2014 <a href="http://developer.here.com">HERE</a>',
+                  subdomains: '1234',
+	              mapID: 'newest',
+	              app_id: 'EWY808Jl2yAHnoNjWjtM',
+	              app_code: '_ePHXx4YNJQAWEceijyRlQ',
+          	      base: 'aerial',
+	              
+});
 
+              nokia_gray = L.tileLayer('http://{s}.{base}.maps.cit.api.here.com/maptile/2.1/maptile/{mapID}/normal.day.grey/{z}/{x}/{y}/256/png8?app_id={app_id}&app_code={app_code}', {
+                  attribution: 'Map &copy; 1987-2014 <a href="http://developer.here.com">HERE</a>',
+                  subdomains: '1234',
+                  mapID: 'newest',
+	              app_id: 'EWY808Jl2yAHnoNjWjtM',
+	              app_code: '_ePHXx4YNJQAWEceijyRlQ',
+          	      base: 'base',
+	             
+});
+
+    nokia_traffic = L.tileLayer('http://{s}.{base}.maps.cit.api.here.com/maptile/2.1/maptile/{mapID}/normal.traffic.day/{z}/{x}/{y}/256/png8?app_id={app_id}&app_code={app_code}', {
+                  attribution: 'Map &copy; 1987-2014 <a href="http://developer.here.com">HERE</a>',
+                  subdomains: '1234',
+                  mapID: 'newest',
+                  app_id: 'EWY808Jl2yAHnoNjWjtM',
+	              app_code: '_ePHXx4YNJQAWEceijyRlQ',
+          	      base: 'base',
+});
+               
 
             LPI_Map= L.tileLayer('http://maps.six.nsw.gov.au/arcgis/rest/services/sixmaps/LPIMap/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Map data &copy; <a href="http://openweathermap.org">OpenWeatherMap</a>',
+            opacity: 0.5
+    
+});
+
+            LPI_Topo= L.tileLayer('http://maps.six.nsw.gov.au/arcgis/rest/services/sixmaps/LPITopoMap/MapServer/tile/{z}/{y}/{x}', {
             attribution: 'Map data &copy; <a href="http://openweathermap.org">OpenWeatherMap</a>',
             opacity: 1
     
 
+    
+});
+
+		    osm= L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'
+});
+
+    	    NAT= L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+    attribution: 'Map data &copy; <a href="http://openweathermap.org">OpenWeatherMap</a>',
+	opacity: 1
+});
+ 
+            OpenWeatherMap_RainClassic= L.tileLayer('http://{s}.tile.openweathermap.org/map/rain_cls/{z}/{x}/{y}.png', {
+    attribution: 'Map data &copy; <a href="http://openweathermap.org">OpenWeatherMap</a>',
+    opacity: 0.5
 });
 
 
- SGR= L.tileLayer('ttps://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-    attribution: 'Map data &copy; <a href="http://openweathermap.org">Sjonni</a>',
+ 
+    MODIS = L.tileLayer('http://map1.vis.earthdata.nasa.gov/wmts-webmerc/MODIS_Terra_CorrectedReflectance_TrueColor/default/{time}/{tilematrixset}{maxZoom}/{z}/{y}/{x}.{format}', {
+    attribution: 'Imagery provided by services from the Global Imagery Browse Services (GIBS), operated by the NASA/GSFC/Earth Science Data and Information System (<a href="https://earthdata.nasa.gov">ESDIS</a>) with funding provided by NASA/HQ.',
+    bounds: [[-85.0511287776, -179.999999975], [85.0511287776, 179.999999975]],
+	minZoom: 1,
+	maxZoom: 9,
+	format: 'jpg',
+	time: '',
+	tilematrixset: 'GoogleMapsCompatible_Level'
+});
+
+
+    Night_2012 = L.tileLayer('http://map1.vis.earthdata.nasa.gov/wmts-webmerc/VIIRS_CityLights_2012/default/{time}/{tilematrixset}{maxZoom}/{z}/{y}/{x}.{format}', {
+    attribution: 'Imagery provided by services from the Global Imagery Browse Services (GIBS), operated by the NASA/GSFC/Earth Science Data and Information System (<a href="https://earthdata.nasa.gov">ESDIS</a>) with funding provided by NASA/HQ.',
+	bounds: [[-85.0511287776, -179.999999975], [85.0511287776, 179.999999975]],
+	minZoom: 1,
+	maxZoom: 8,
+	format: 'jpg',
+	time: '',
+	tilematrixset: 'GoogleMapsCompatible_Level'
+});
+
+    Nasa_daily_true = L.tileLayer('http://map1.vis.earthdata.nasa.gov/wmts-webmerc/VIIRS_SNPP_CorrectedReflectance_TrueColor/default/default/{time}/{tilematrixset}{maxZoom}/{z}/{y}/{x}.{format}', {
+    attribution: 'Imagery provided by services from the Global Imagery Browse Services (GIBS).rautt er snjór. hvítur er ský, operated by the NASA/GSFC/Earth Science Data and Information System (<a href="https://earthdata.nasa.gov">ESDIS</a>) with funding provided by NASA/HQ.',
+	bounds: [[-85.0511287776, -179.999999975], [85.0511287776, 179.999999975]],
+	minZoom: 1,
+	maxZoom: 9,
+	format: 'jpg',
+	time: '',
+	tilematrixset: 'GoogleMapsCompatible_Level'
+});
+
+            LPI_imagery= L.tileLayer('http://maps.six.nsw.gov.au/arcgis/rest/services/sixmaps/LPI_Imagery_Best/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Map data &copy; <a href="http://openweathermap.org">OpenWeatherMap</a>',
     opacity: 1
-            
+    
+
+ }); 
+ 
+             Sydney_1943= L.tileLayer('http://maps.six.nsw.gov.au/arcgis/rest/services/sixmaps/sydney1943/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Map data &copy; <a href="http://openweathermap.org">OpenWeatherMap</a>',
+    opacity: 1
+    
+}); 
+ 
+  
+ 
+   osm_bw= L.tileLayer('http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png', {
+    attribution: 'Map data &copy; <a href="http://openweathermap.org">OpenWeatherMap</a>',
+    opacity: 0.5
+
+});
+OpenWeatherMap_rain = L.tileLayer('https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=d919dd703c3b3ecd0a910d7b00e1b1b9', {
+    maxZoom: 19,
+	attribution: 'Map data &copy; <a href="http://openweathermap.org">OpenWeatherMap</a>',
+	opacity: 0.9
+
+});
+OpenWeatherMap_clouds = L.tileLayer('https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=d919dd703c3b3ecd0a910d7b00e1b1b9', {
+    maxZoom: 19,
+    attribution: 'Map data &copy; <a href="http://openweathermap.org">OpenWeatherMap</a>',
+	opacity: 0.8
+});
+OpenWeatherMap_temp = L.tileLayer('https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=d919dd703c3b3ecd0a910d7b00e1b1b9', {
+    maxZoom: 19,
+    attribution: 'Map data &copy; <a href="http://openweathermap.org">OpenWeatherMap</a>',
+	opacity: 0.8
+
+});
+ OpenWeatherMap_wind = L.tileLayer('https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=d919dd703c3b3ecd0a910d7b00e1b1b9', {
+    maxZoom: 19,
+    attribution: 'Map data &copy; <a href="http://openweathermap.org">OpenWeatherMap</a>',
+    apiKey: '510fe1164829948a6c2df6cc89444de1',
+	opacity: 0.9
 });
 
-            
-        //  var googleLayer = new L.Google();
-        //  map.addLayer(googleLayer);
-            
-        //  var googleRoadmapLayer = new L.Google('ROADMAP');
-        //  map.addLayer(googleRoadmapLayer);
-            
-            countriesLayer = L.geoJson(
-                countries,
-                {
-                    style : countriesStyle,
-                    onEachFeature : countriesOnEachFeature
-                }
-            );
-        //  map.fitBounds(countriesLayer.getBounds());
-            
-            var legend = L.control({position : 'bottomright'});
-            legend.onAdd = function(map){
-                var div = L.DomUtil.create('div', 'legend');
-                var labels = [
-                    "ibúafjöldi meiri en 100000000", 
-                    "ibúafjöldi meiri en 50000000", 
-                    "ibúafjöldi minni en 50000000"
-                ];
-                var grades = [100000001, 50000001, 50000000];
-                div.innerHTML = '<div><b>Legend</b></div>';
-                for(var i = 0; i < grades.length; i++){
-                    div.innerHTML += '<i style="background:' 
-                    + getCountryColor(grades[i]) + '">&nbsp;&nbsp;</i>&nbsp;&nbsp;'
-                    + labels[i] + '<br />';
-                }
-                return div;
-            }
-            legend.addTo(map);
-            
-            var visible;
-            map.on(
-                'zoomend',
-                function(e){
-                    if(map.getZoom() > 5){
-                        if(!visible){
-                            for(var i = 0; i < markers.length; i++){
-                                markers[i].showLabel();
-                            }
-                            visible = true;
-                        }
-                    }else{
-                        if(visible){
-                            for(var i = 0; i < markers.length; i++){
-                                markers[i].hideLabel();
-                            }
-                            visible = false;
-                        }
-                    }
-                }
-            
-            );
-            
-            var imageUrl = 'data/SP27GTIF.png';
-            var imageBounds = [
-                [-32.83299831003662, 150.5823733664601],
-                [-33.91713209771033, 151.66747359388185]
-            ];
-            var imageLayer = L.imageOverlay(imageUrl, imageBounds);
-        //  map.fitBounds(imageBounds);
-            
-        var baseMaps = {
-         'osm' : osm,
-            };
-            var overlayMaps = {
-                'Countries' : countriesLayer, 
-                'Image' : imageLayer,
-                    'LPI' : LPI_Map,
-                    'SGR' : SGR,
-                   
-            };
-            
-            L.control.layers(baseMaps, overlayMaps).addTo(map);
-            L.control.scale ({maxWidth:240, metric:true, imperial:false, position: 'bottomright'}).addTo (map);
-           L.control.polylineMeasure ({position:'topleft', unit:'metres', showBearings:true, clearMeasurementsOnStop: false, showClearControl: true, showUnitControl: true}).addTo (map);
-L.control.locate().addTo(map);
+   lmi= L.tileLayer('http://gis.lmi.is/mapcache/wmts/{z}/{x}/{y}.png', {
+    attribution: 'Map data &copy; <a href="http://openweathermap.org">OpenWeatherMap</a>',
+    opacity: 1
+}); 
+ 
+   esri_imagery= L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Map data &copy; <a href="http://openweathermap.org">OpenWeatherMap</a>',
+    opacity: 1
+
+}); 
+ 
+   rail= L.tileLayer('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', {
+    attribution: 'Map data &copy; <a href="http://openweathermap.org">OpenWeatherMap</a>',
+    opacity: 1
+
+}); 
+ map1955= L.tileLayer('http://thulemaps.com/RF_1955/{z}/{x}/{y}.jpg', {
+    attribution: 'Map data &copy; <a href="https://www.lmi.is/leyfi-fyrir-gjaldfrjals-gogn/">lmi.is</a>',
+    opacity: 1,
+    tms: false,
+ }); 
+ map1957= L.tileLayer('http://thulemaps.com/rf_1957/{z}/{x}/{y}.png', {
+    attribution: 'Map data &copy; <a href="https://www.lmi.is/leyfi-fyrir-gjaldfrjals-gogn/">lmi.is</a>',
+    opacity: 1,
+    tms: false,
+ }); 
+ map1964= L.tileLayer('http://thulemaps.com/RF_1964/{z}/{x}/{y}.jpg', {
+    attribution: 'Map data &copy; <a href="https://www.lmi.is/leyfi-fyrir-gjaldfrjals-gogn/">lmi.is</a>',
+    opacity: 1,
+    tms: false,
+ 
+   }); 
+   map1974= L.tileLayer('http://thulemaps.com/1974/RF_1974/{z}/{x}/{y}.png', {
+    attribution: 'Map data &copy; <a href="https://www.lmi.is/leyfi-fyrir-gjaldfrjals-gogn/">lmi.is</a>',
+    opacity: 1,
+    tms: true,
+   }); 
+ 
+   map1980= L.tileLayer('http://thulemaps.com/1980/RF_1980/{z}/{x}/{y}.png', {
+    attribution: 'Map data &copy; <a href="https://www.lmi.is/leyfi-fyrir-gjaldfrjals-gogn/">lmi.is</a>',
+    opacity: 1,
+    tms: true,
+    
+   }); 
+ 
+   map1984= L.tileLayer('http://thulemaps.com/1984/RF_1984/{z}/{x}/{y}.png', {
+    attribution: 'Map data &copy; <a href="https://www.lmi.is/leyfi-fyrir-gjaldfrjals-gogn/">lmi.is</a>',
+    opacity: 1,
+    tms: true,
+    
+   }); 
+ 
+   map1987= L.tileLayer('http://thulemaps.com/1987/RF_1987/{z}/{x}/{y}.png', {
+    attribution: 'Map data &copy; <a href="https://www.lmi.is/leyfi-fyrir-gjaldfrjals-gogn/">lmi.is</a>',
+    opacity: 1,
+    tms: true,
+    
+   }); 
+ 
+   map1994= L.tileLayer('http://thulemaps.com/1994/RF_1994/{z}/{x}/{y}.png', {
+    attribution: 'Map data &copy; <a href="https://www.lmi.is/leyfi-fyrir-gjaldfrjals-gogn/">lmi.is</a>',
+    opacity: 1,
+    tms: true,
+
+   }); 
+ 
+   map1997= L.tileLayer('http://thulemaps.com/1997/RF_1997/{z}/{x}/{y}.png', {
+    attribution: 'Map data &copy; <a href="https://www.lmi.is/leyfi-fyrir-gjaldfrjals-gogn/">lmi.is</a>',
+    opacity: 1,
+    tms: true,
+   }); 
+  
+  basemap= L.tileLayer('http://thulemaps.com/grunnkort/basemap/{z}/{x}/{y}.png', {
+    attribution: 'Map data &copy; <a href="https://www.lmi.is/leyfi-fyrir-gjaldfrjals-gogn/">lmi.is</a>',
+    opacity: 1,
+    tms: false,
+   }); 
+   
+   labels= L.tileLayer('https://{s}.tile.openstreetmap.se/hydda/roads_and_labels/{z}/{x}/{y}.png', {
+    attribution: 'Map data &copy; <a href="http://openweathermap.org">OpenWeatherMap</a>',
+    opacity: 1
+
+
+
+
+ }); 
+		// Load the map
+		var map = L.map('map', {
+			center: [65.0345,-14.2149],
+			zoom: 15,
+			layers: [map1955]
+		});
+
+		var baseLayers = {
+			"osm": osm,
+            "kort":basemap,
+            "1955":map1955,
+            "1957":map1957,
+            "1964":map1964,
+            "1974":map1974,
+			"1980":map1980,
+            "1984":map1984,
+            "1987":map1987,
+            "1994":map1994,
+            "1997":map1997,
+            "loftmynd": nokia_aerial,
+            "open topo":NAT
+        
            
-
-            
-            var c = new L.Control.Coordinates();
-        c.addTo(map);
-
-        function onMapClick(e) {
-            c.setCoordinates(e);
-        }
-
-        map.on('click', onMapClick);
+           // "World": World
             
             
-        </script>
-    </body>
+            
+            
+          
+		};
+
+		var golfvellir_layer = new L.LayerGroup();
+        
+
+		var overlays = {
+            
+            "osm bw": osm_bw,
+             "nasa":MODIS,
+             "sky": OpenWeatherMap_clouds,
+             "rigning": OpenWeatherMap_rain,
+             "vindur": OpenWeatherMap_wind,
+             "hiti": OpenWeatherMap_temp,
+             
+    		
+            
+             
+             
+             
+            
+            
+            
+            
+            
+            
+        
+		};
+
+		L.control.layers(baseLayers, overlays).addTo(map);
+        L.Control.measureControl().addTo(map);
+        
+       L.Control.geocoder().addTo(map);
+        
+        L.control.scale().addTo(map);
+       L.control.locate().addTo(map);
+        L.control.navbar().addTo(map);
+        L.control.scale().addTo(map);
+    //geojson
+    
+    function basementDweller (feature,layer) {
+        layer.bindPopup("<h1>Hi, I'm an info window</h1>");
+    };
+     L.geoJson(World, {
+        //onEachFeature: ; basementDweller
+     }).addTo(map);
+        
+        
+        
+        L.Routing.control({
+  waypoints: [
+    L.latLng(64.131755,-21.860449),
+    L.latLng(65.033475,-14.219974)
+  ],
+    routeWhileDragging: true,
+    
+    geocoder: L.Control.Geocoder.nominatim()
+}).addTo(map);
+
+  L.control.weather().addTo(map);
+      
+        var geojsonMarkerOptions = {
+    	    radius: 5,
+		    fillColor: "#ff7800",
+		    color: "#EE4500",
+		    weight: 0.2,
+		    opacity: 1,
+		    fillOpacity: 0.8
+        };
+    
+        
+  function createButton(label, container) {
+    var btn = L.DomUtil.create('button', '', container);
+    btn.setAttribute('type', 'button');
+    btn.innerHTML = label;
+    return btn;
+}
+
+map.on('click', function(e) {
+    var container = L.DomUtil.create('div'),
+        startBtn = createButton('finna leið frá þessum stað', container),
+        destBtn = createButton('finna leið á þennan stað', container);
+
+L.DomEvent.on(startBtn, 'click', function() {
+        control.spliceWaypoints(0, 1, e.latlng);
+        map.closePopup();
+    });
+
+    L.DomEvent.on(destBtn, 'click', function() {
+        control.spliceWaypoints(control.getWaypoints().length - 1, 1, e.latlng);
+        map.closePopup();
+    });
+
+
+    L.popup()
+        .setContent(container)
+        .setLatLng(e.latlng)
+        .openOn(map);
+    
+});
+        
+  
+      var popup = L.popup()
+
+function onMapClick(e) {
+    popup
+        .setLatLng(e.latlng)
+        .setContent("Fetching weather info")
+        .openOn(mymap);
+
+    fetch('https://api.openweathermap.org/data/2.5/weather?lat=' + e.latlng.lat + '&lon=' + e.latlng.lng + '&appid=' + yourApiKey)
+        .then(r => r.json()) 
+        .then(data => { 
+            // Change this line to show exactly the info you need
+            popup.setContent(data.weather.map(w => w.description).join(", "))
+        })
+}
+
+mymap.on('click', onMapClick)
+        
+       
+	
+  
+	</script>
+
+</body>
 </html>
 
