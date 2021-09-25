@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>
+            Mitt Kort
+        </title>
+        <!-- Leaflet -->
+        <link rel="stylesheet" href="lib/leaflet/leaflet.css" />
+        <link rel="stylesheet" href="lib/leaflet/leaflet.label.css" />
+        <link rel="stylesheet" href="lib/leaflet/Control.Coordinates.css" />
+     <link rel="stylesheet" href="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.css" />
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="lib/leaflet/L.Control.Locate.min.css" />
+     
+     <script src="lib/leaflet/leaflet.js"></script>
+        <script src="lib/leaflet/leaflet.label.js"></script>
+        <script src="http://maps.google.com/maps/api/js?v=3&sensor=false"></script>
+        <script src="lib/leaflet/Google.js"></script>
+        <script src="data/countries.geojson"></script>
+        <script src="lib/leaflet/Control.Coordinates.js"></script>
+<script src="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.js"></script>
+<script src="lib/leaflet/L.Control.Locate.js"></script>
+
+        <style type="text/css">
+        #map { height : 600px; }
+
+            .legend { background : white; line-height : 1.5em}
+            .legend i { width : 5em; float : left }
+            .map-label { background : yellow }
+        </style>
+    </head>
+    <body>
+        <h1>map resource</h1>
+        <div id="map"></div>
+        <script>
+            var countriesLayer;
+            
+            function highlightFeature(e){
+                var layer = e.target;
+                layer.setStyle(
+                    {
+                        weight : 5,
+                        color : 'black',
+                        fillColor : 'white',
+                        fillOpacity : 0.2
+                    }
+                );
+                if(!L.Browser.ie && !L.Browser.opera){
+                    layer.bringToFront();
+                }
+            }
+            
+            function resetHighlight(e){
+                countriesLayer.resetStyle(e.target);
+            }
+            
+            function zoomToFeature(e){
+                map.fitBounds(e.target.getBounds());
+            }
+            
+            var markers = new Array();
+            function countriesOnEachFeature(feature, layer){
+                markers.push(
+                    L.circleMarker(
+                        layer.getBounds().getCenter(),
+                        {
+                            radius : 0.0,
+                            opacity : 0,
+                            fillOpacity : 0
+                        }
+                    )
+                );
+                var markersCount = markers.length;
+                markers[markersCount - 1].bindLabel(
+                    feature.properties.pop_est.toString(),
+                    {
+                            noHide : true,
+                            className : 'map-label',
+                            pane : 'mapPane'
+                    }
+                );
+                markers[markersCount - 1].addTo(map);
+                markers[markersCount - 1].hideLabel();
+                
+                layer.on(
+                    {
+                        mouseover : highlightFeature,
+                        mouseout : resetHighlight,
+                        click : zoomToFeature
+                    }
+                );
+            }
+            
+            function getCountryColor(popEst){
+                if(popEst > 100000000){
+                    return 'red';
+                }else if(popEst > 50000000){
+                    return 'blue';
+                }else{
+                    return 'purple';
+                }
+                
+            }
+            
+            function countriesStyle(feature){
+                return {
+                    fillColor : getCountryColor(feature.properties.popEst),
+                    weight : 2,
+                    opacity : 1,
+                    color : 'white',
+                    dashArray : 3,
+                    fillOpacity : 0.7
+                }
+            }
+            
+            var map = L.map('map').setView([-33.9835,150.7946], 13);
+            var osm= L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'
+}).addTo(map);
+
+
+
+            LPI_Map= L.tileLayer('http://maps.six.nsw.gov.au/arcgis/rest/services/sixmaps/LPIMap/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Map data &copy; <a href="http://openweathermap.org">OpenWeatherMap</a>',
+            opacity: 1
+    
+
+});
+
+
+ SGR= L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/streets-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFza290YSIsImEiOiJjaXp0bmI3M3EwMDBvMndzMHJudnlsMDllIn0.jV7rTNmfiqjx57usCu54rQ', {
+    attribution: 'Map data &copy; <a href="http://openweathermap.org">Sjonni</a>',
+    opacity: 1
+            
+});
+
+            
+        //  var googleLayer = new L.Google();
+        //  map.addLayer(googleLayer);
+            
+        //  var googleRoadmapLayer = new L.Google('ROADMAP');
+        //  map.addLayer(googleRoadmapLayer);
+            
+            countriesLayer = L.geoJson(
+                countries,
+                {
+                    style : countriesStyle,
+                    onEachFeature : countriesOnEachFeature
+                }
+            );
+        //  map.fitBounds(countriesLayer.getBounds());
+            
+            var legend = L.control({position : 'bottomright'});
+            legend.onAdd = function(map){
+                var div = L.DomUtil.create('div', 'legend');
+                var labels = [
+                    "ibúafjöldi meiri en 100000000", 
+                    "ibúafjöldi meiri en 50000000", 
+                    "ibúafjöldi minni en 50000000"
+                ];
+                var grades = [100000001, 50000001, 50000000];
+                div.innerHTML = '<div><b>Legend</b></div>';
+                for(var i = 0; i < grades.length; i++){
+                    div.innerHTML += '<i style="background:' 
+                    + getCountryColor(grades[i]) + '">&nbsp;&nbsp;</i>&nbsp;&nbsp;'
+                    + labels[i] + '<br />';
+                }
+                return div;
+            }
+            legend.addTo(map);
+            
+            var visible;
+            map.on(
+                'zoomend',
+                function(e){
+                    if(map.getZoom() > 5){
+                        if(!visible){
+                            for(var i = 0; i < markers.length; i++){
+                                markers[i].showLabel();
+                            }
+                            visible = true;
+                        }
+                    }else{
+                        if(visible){
+                            for(var i = 0; i < markers.length; i++){
+                                markers[i].hideLabel();
+                            }
+                            visible = false;
+                        }
+                    }
+                }
+            
+            );
+            
+            var imageUrl = 'data/SP27GTIF.png';
+            var imageBounds = [
+                [-32.83299831003662, 150.5823733664601],
+                [-33.91713209771033, 151.66747359388185]
+            ];
+            var imageLayer = L.imageOverlay(imageUrl, imageBounds);
+        //  map.fitBounds(imageBounds);
+            
+        var baseMaps = {
+         'osm' : osm,
+            };
+            var overlayMaps = {
+                'Countries' : countriesLayer, 
+                'Image' : imageLayer,
+                    'LPI' : LPI_Map,
+                    'SGR' : SGR,
+                   
+            };
+            
+            L.control.layers(baseMaps, overlayMaps).addTo(map);
+            L.control.scale ({maxWidth:240, metric:true, imperial:false, position: 'bottomright'}).addTo (map);
+           L.control.polylineMeasure ({position:'topleft', unit:'metres', showBearings:true, clearMeasurementsOnStop: false, showClearControl: true, showUnitControl: true}).addTo (map);
+L.control.locate().addTo(map);
+           
+
+            
+            var c = new L.Control.Coordinates();
+        c.addTo(map);
+
+        function onMapClick(e) {
+            c.setCoordinates(e);
+        }
+
+        map.on('click', onMapClick);
+            
+            
+        </script>
+    </body>
+</html>
+
