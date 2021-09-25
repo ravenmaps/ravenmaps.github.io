@@ -1,0 +1,265 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kollur - Probably the best golf course in the world!</title>
+    <link rel="shortcut icon" href="/kort/leaflet/favicon.ico" type="image/x-icon" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+    <link rel="stylesheet" href="/kort/../kort/leaflet/Control.Coordinates.css" />
+    <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/themes/css/cartodb.css" />
+    <link rel="stylesheet" href="/kort/leaflet/leaflet.draw.css" />
+    <link rel="stylesheet" href="/kort/leaflet/leaflet.measurecontrol.css" />
+    <link rel="stylesheet" href="/kort/leaflet/Control.MiniMap.css" />
+    <link rel="stylesheet" href="/kort/leaflet/Control.Geocoder.css" />
+    <link rel="stylesheet" href="/kort/leaflet//L.Control.Locate.css" />
+    <link rel="stylesheet" href="/kort/leaflet/Leaflet.NavBar.css" />
+    <link rel="stylesheet" href="/kort/leaflet/leaflet-routing-machine.css" />
+
+    
+
+	<style>
+		html, body, #map { height:100%; width:100%; padding:0px; margin:0px; }
+	</style>
+</head>
+<body>
+	<div id="map"></div>
+ 	<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+ 	<script src="/kort/../kort/leaflet/golfvellir.js"></script>
+     <script src="/kort/../kort/leaflet/Control.Coordinates.js"></script>
+     <script src="http://libs.cartocdn.com/cartodb.js/v3/cartodb.js"></script>
+     <script src="/kort/leaflet/leaflet.draw.js"></script>
+     <script src="/kort/leaflet/leaflet.measurecontrol.js"></script>
+     <script src="/kort/../kort/leaflet/Control.MiniMap.js" type="text/javascript"></script>
+     <script src="/kort/leaflet/Control.Geocoder.js"></script>
+     <script src="/kort/leaflet//L.Control.Locate.js" ></script>
+     <script src="/kort/leaflet/Leaflet.NavBar.js"></script>
+     <script src="/kort/leaflet/Leaflet.Weather.js"></script>
+     <script src="/kort/leaflet/leaflet-routing-machine.js"></script>
+     
+     
+
+	<script>
+
+    
+
+		// Build different tile layers (the id is what switchs between different mapbox tiles)
+		var Thunderforest_cycle = L.tileLayer('http://{s}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="http://www.opencyclemap.org">OpenCycleMap</a>, &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'
+});
+			  nokia_aerial = L.tileLayer('http://{s}.{base}.maps.cit.api.here.com/maptile/2.1/maptile/{mapID}/satellite.day/{z}/{x}/{y}/256/png8?app_id={app_id}&app_code={app_code}', {
+                  attribution: 'Map &copy; 1987-2014 <a href="http://developer.here.com">HERE</a>',
+                  subdomains: '1234',
+	              mapID: 'newest',
+	              app_id: 'EWY808Jl2yAHnoNjWjtM',
+	              app_code: '_ePHXx4YNJQAWEceijyRlQ',
+          	      base: 'aerial',
+	              
+});
+
+              nokia_gray = L.tileLayer('http://{s}.{base}.maps.cit.api.here.com/maptile/2.1/maptile/{mapID}/normal.day.grey/{z}/{x}/{y}/256/png8?app_id={app_id}&app_code={app_code}', {
+                  attribution: 'Map &copy; 1987-2014 <a href="http://developer.here.com">HERE</a>',
+                  subdomains: '1234',
+                  mapID: 'newest',
+	              app_id: 'EWY808Jl2yAHnoNjWjtM',
+	              app_code: '_ePHXx4YNJQAWEceijyRlQ',
+          	      base: 'base',
+	             
+});
+
+    nokia_traffic = L.tileLayer('http://{s}.{base}.maps.cit.api.here.com/maptile/2.1/maptile/{mapID}/normal.traffic.day/{z}/{x}/{y}/256/png8?app_id={app_id}&app_code={app_code}', {
+                  attribution: 'Map &copy; 1987-2014 <a href="http://developer.here.com">HERE</a>',
+                  subdomains: '1234',
+                  mapID: 'newest',
+                  app_id: 'EWY808Jl2yAHnoNjWjtM',
+	              app_code: '_ePHXx4YNJQAWEceijyRlQ',
+          	      base: 'base',
+});
+               
+
+            OpenWeatherMap_Pressure= L.tileLayer('http://{s}.tile.openweathermap.org/map/pressure_cntr/{z}/{x}/{y}.png', {
+            attribution: 'Map data &copy; <a href="http://openweathermap.org">OpenWeatherMap</a>',
+            opacity: 0.5
+    
+});
+
+		    osm= L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'
+});
+
+    	    OpenWeatherMap_Wind= L.tileLayer('http://{s}.tile.openweathermap.org/map/wind/{z}/{x}/{y}.png', {
+    attribution: 'Map data &copy; <a href="http://openweathermap.org">OpenWeatherMap</a>',
+	opacity: 0.5
+});
+ 
+            OpenWeatherMap_RainClassic= L.tileLayer('http://{s}.tile.openweathermap.org/map/rain_cls/{z}/{x}/{y}.png', {
+    attribution: 'Map data &copy; <a href="http://openweathermap.org">OpenWeatherMap</a>',
+    opacity: 0.5
+});
+
+ 
+    MODIS = L.tileLayer('http://map1.vis.earthdata.nasa.gov/wmts-webmerc/MODIS_Terra_CorrectedReflectance_TrueColor/default/{time}/{tilematrixset}{maxZoom}/{z}/{y}/{x}.{format}', {
+    attribution: 'Imagery provided by services from the Global Imagery Browse Services (GIBS), operated by the NASA/GSFC/Earth Science Data and Information System (<a href="https://earthdata.nasa.gov">ESDIS</a>) with funding provided by NASA/HQ.',
+    bounds: [[-85.0511287776, -179.999999975], [85.0511287776, 179.999999975]],
+	minZoom: 1,
+	maxZoom: 9,
+	format: 'jpg',
+	time: '',
+	tilematrixset: 'GoogleMapsCompatible_Level'
+});
+
+
+    Night_2012 = L.tileLayer('http://map1.vis.earthdata.nasa.gov/wmts-webmerc/VIIRS_CityLights_2012/default/{time}/{tilematrixset}{maxZoom}/{z}/{y}/{x}.{format}', {
+    attribution: 'Imagery provided by services from the Global Imagery Browse Services (GIBS), operated by the NASA/GSFC/Earth Science Data and Information System (<a href="https://earthdata.nasa.gov">ESDIS</a>) with funding provided by NASA/HQ.',
+	bounds: [[-85.0511287776, -179.999999975], [85.0511287776, 179.999999975]],
+	minZoom: 1,
+	maxZoom: 8,
+	format: 'jpg',
+	time: '',
+	tilematrixset: 'GoogleMapsCompatible_Level'
+});
+
+    Modis_Terra_367 = L.tileLayer('http://map1.vis.earthdata.nasa.gov/wmts-webmerc/MODIS_Terra_CorrectedReflectance_Bands367/default/{time}/{tilematrixset}{maxZoom}/{z}/{y}/{x}.{format}', {
+    attribution: 'Imagery provided by services from the Global Imagery Browse Services (GIBS).rautt er snjór. hvítur er ský, operated by the NASA/GSFC/Earth Science Data and Information System (<a href="https://earthdata.nasa.gov">ESDIS</a>) with funding provided by NASA/HQ.',
+	bounds: [[-85.0511287776, -179.999999975], [85.0511287776, 179.999999975]],
+	minZoom: 1,
+	maxZoom: 9,
+	format: 'jpg',
+	time: '',
+	tilematrixset: 'GoogleMapsCompatible_Level'
+});
+
+
+
+            SR= L.tileLayer('https://{s}.tiles.mapbox.com/v3/sjonni11.lm3dflap/{z}/{x}/{y}.png', {
+    attribution: 'Map data &copy; <a href="http://openweathermap.org">OpenWeatherMap</a>',
+    opacity: 1
+
+ }); 
+ 
+             SGR= L.tileLayer('https://{s}.tiles.mapbox.com/v3/sjonni11.gj2dok6k/{z}/{x}/{y}.png', {
+    attribution: 'Map data &copy; <a href="http://openweathermap.org">OpenWeatherMap</a>',
+    opacity: 1
+    
+ }); 
+ 
+             PP= L.tileLayer('https://{s}.tiles.mapbox.com/v3/sjonni11.map-2c8dzowr/{z}/{x}/{y}.png', {
+    attribution: 'Map data &copy; <a href="http://openweathermap.org">OpenWeatherMap</a>',
+    opacity: 1
+
+
+ }); 
+		// Load the map
+		var map = L.map('map', {
+			center: [64.947,-18.127],
+			zoom: 7,
+			layers: [osm]
+		});
+
+		var baseLayers = {
+			"osm": osm,
+			"loftmynd": nokia_aerial,
+			"Thunder": Thunderforest_cycle,
+            "nokia gray": nokia_gray,
+            "nokia traffic": nokia_traffic,
+            "krot": SR,
+            "tilraunakort": SGR,
+            "sjóræningjakort": PP,
+            "gervitunglamynd": MODIS,
+            "nótt 2012": Night_2012,
+            "snjór og ský": Modis_Terra_367
+            
+          
+		};
+
+		var golfvellir_layer = new L.LayerGroup();
+        
+
+		var overlays = {
+			"þrýstingur": OpenWeatherMap_Pressure,
+            "walking time frá Price St": golfvellir_layer,
+            "vindur": OpenWeatherMap_Wind,
+            "úrkoma": OpenWeatherMap_RainClassic,
+            
+            
+            
+            
+            
+        
+		};
+
+		L.control.layers(baseLayers, overlays).addTo(map);
+        L.Control.measureControl().addTo(map);
+        
+        L.Control.geocoder().addTo(map);
+        
+        L.control.scale().addTo(map);
+        L.control.locate().addTo(map);
+        L.control.navbar().addTo(map);
+      
+        
+        L.Routing.control({
+  waypoints: [
+    L.latLng(64.131755,-21.860449),
+    L.latLng(65.033475,-14.219974)
+  ],
+    routeWhileDragging: true,
+    
+    geocoder: L.Control.Geocoder.nominatim()
+}).addTo(map);
+
+  L.control.weather().addTo(map);
+      
+        var geojsonMarkerOptions = {
+    	    radius: 5,
+		    fillColor: "#ff7800",
+		    color: "#EE4500",
+		    weight: 0.2,
+		    opacity: 1,
+		    fillOpacity: 0.8
+        };
+    
+        
+  function createButton(label, container) {
+    var btn = L.DomUtil.create('button', '', container);
+    btn.setAttribute('type', 'button');
+    btn.innerHTML = label;
+    return btn;
+}
+
+map.on('click', function(e) {
+    var container = L.DomUtil.create('div'),
+        startBtn = createButton('finna leið frá þessum stað', container),
+        destBtn = createButton('finna leið á þennan stað', container);
+
+L.DomEvent.on(startBtn, 'click', function() {
+        control.spliceWaypoints(0, 1, e.latlng);
+        map.closePopup();
+    });
+
+    L.DomEvent.on(destBtn, 'click', function() {
+        control.spliceWaypoints(control.getWaypoints().length - 1, 1, e.latlng);
+        map.closePopup();
+    });
+
+
+    L.popup()
+        .setContent(container)
+        .setLatLng(e.latlng)
+        .openOn(map);
+});
+        
+  
+      
+        
+       
+	var osmGeocoder = new L.Control.Geocoder();
+
+     map.addControl(Geocoder);
+     
+  
+	</script>
+
+</body>
+</html>
