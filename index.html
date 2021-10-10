@@ -355,11 +355,9 @@ map.addControl(new mapboxgl.GeolocateControl({
     map.on('click', 'gtfs_pathways_time', function (e) {
         new mapboxgl.Popup()
             .setLngLat(e.lngLat)
-            .setHTML(e.features[0].properties.traversal_time2 + 'sec' + .setHTMLp.STOP_NAME + ' (' + p.2016_17_PATRONAGE + ')'))
-	    //.setHTML(e.features.map(function(feature) { return feature.properties.traversal_time2 + 'sec'; }).join(', '))
-	    //.setHTML(p.STOP_NAME + ' (' + p.2016_17_PATRONAGE + ')')
-	    
-	 // .setHTML(e.features[0].properties.traversal_time2 + ' (' + e.feature[0].properties.pathway_id + ')')
+           
+	    .setHTML(e.features.map(function(feature) { return feature.properties.traversal_time2 + 'sec'; }).join(', '))
+	   
 	    
 	    
             .addTo(map);
