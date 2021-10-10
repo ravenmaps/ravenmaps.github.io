@@ -355,7 +355,7 @@ map.addControl(new mapboxgl.GeolocateControl({
     map.on('click', 'gtfs_pathways_time', function (e) {
         new mapboxgl.Popup()
             .setLngLat(e.lngLat)
-            .setHTML(e.features[0].properties.traversal_time2)
+            .setHTML(e.features[0].properties.traversal_time2 + 'sec')
             .addTo(map);
     });
 document.getElementById('fly').addEventListener('click', function () {
