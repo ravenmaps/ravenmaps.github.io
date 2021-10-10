@@ -251,15 +251,15 @@ map.on('load', function () {
         
 //cycle data
 
-    map.addSource('cycleway_tp_map_layer-d8ay9v', {
+    map.addSource('gtfs_pathways_time-3yo2p1', {
         type: 'vector',
-        url: 'mapbox://thulemaps.b9unceul'
+        url: 'mapbox://thulemaps.c4190uh8'
     });
   map.addLayer({
-        'id': 'cycle paths',
+        'id': 'gtfs_pathways_time',
         'type': 'line',
-        'source': 'cycleway_tp_map_layer-d8ay9v',
-        'source-layer': 'cycleway_tp_map_layer-d8ay9v',
+        'source': 'gtfs_pathways_time-3yo2p1',
+        'source-layer': 'gtfs_pathways_time-3yo2p1',
         'layout': {
             'visibility': 'none',
             'line-join': 'round',
@@ -305,7 +305,7 @@ map.addControl(new MapboxGeocoder({
 });
 
 // layers uppi til vinstri
-var toggleableLayerIds = ['cycle pop up', 'stations', 'cycle paths', 'contours'];
+var toggleableLayerIds = ['cycle pop up', 'stations', 'gtfs_pathways_time', 'contours'];
 
 for (var i = 0; i < toggleableLayerIds.length; i++) {
     var id = toggleableLayerIds[i];
