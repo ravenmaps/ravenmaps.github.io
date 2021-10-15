@@ -1,8 +1,9 @@
+
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8" />
-<title>kort - traffic</title>
+<title>bike trip</title>
 <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
 <script src="https://api.mapbox.com/mapbox-gl-js/v2.4.0/mapbox-gl.js"></script>
 <link href="https://api.mapbox.com/mapbox-gl-js/v2.4.0/mapbox-gl.css" rel="stylesheet">
@@ -98,7 +99,7 @@ type="text/css"
 
 <div id="map"></div>
 <style>
-    #fly_war {
+    #fly {
         display: block;
         position: absolute;
         bottom: 10px;
@@ -114,10 +115,10 @@ type="text/css"
         background: #ee8a65;
     }
 </style>
-<button id='fly_war'>reydarfjordur</button>
+<button id='fly'>western sydney regional park</button>
 
 <style>
-    #fly {
+    #fly1 {
         display: block;
         position: absolute;
         bottom: 55px;
@@ -135,7 +136,7 @@ type="text/css"
 </style>
     
 
-<button id='fly'>Leppington Oval</button>
+<button id='fly1'>cecil hills</button>
 
 <style>
     #fly2 {
@@ -154,7 +155,7 @@ type="text/css"
         background: #ee8a65;
     }
 </style>
-<button id='fly2'>School</button>
+<button id='fly2'>longfellow</button>
 <script>
 mapboxgl.accessToken = 'pk.eyJ1IjoidGh1bGVtYXBzIiwiYSI6ImNqM3F0Y2JnaDAxYnQzM28xZDVwazhhaDEifQ.pofHlcCOkr9OXfKsMYAAFw';
 //var bounds = [
@@ -165,9 +166,9 @@ mapboxgl.accessToken = 'pk.eyJ1IjoidGh1bGVtYXBzIiwiYSI6ImNqM3F0Y2JnaDAxYnQzM28xZ
 var map = new mapboxgl.Map({
 container: 'map',
 style: 'mapbox://styles/thulemaps/ckaq5ndaj0jy41jqkrvmiajr4',
-center: [150.9988,-33.8670],
-zoom: 11,
-pitch:60,
+center: [150.8704,-33.9174],
+zoom: 12,
+pitch:0,
 antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
 });
  
@@ -305,23 +306,19 @@ map.addControl(new MapboxGeocoder({
 });
 
 // layers uppi til vinstri
-var toggleableLayerIds = ['cycle pop up', 'stations', 'gtfs_pathways_time', 'contours','biketrip','sop'];
+var toggleableLayerIds = ['cycle pop up', 'stations', 'gtfs_pathways_time', 'contours','biketrip','sop', 'drinkingwater'];
 
 for (var i = 0; i < toggleableLayerIds.length; i++) {
     var id = toggleableLayerIds[i];
-
     var link = document.createElement('a');
     link.href = '#';
     link.className = 'active';
     link.textContent = id;
-
     link.onclick = function (e) {
         var clickedLayer = this.textContent;
         e.preventDefault();
         e.stopPropagation();
-
         var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
-
         if (visibility === 'visible') {
             map.setLayoutProperty(clickedLayer, 'visibility', 'none');
             this.className = '';
@@ -330,7 +327,6 @@ for (var i = 0; i < toggleableLayerIds.length; i++) {
             map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
         }
     };
-
     var layers = document.getElementById('menu');
     layers.appendChild(link);
 }
@@ -362,37 +358,69 @@ map.addControl(new mapboxgl.GeolocateControl({
 	    
             .addTo(map);
     });
+	
+	map.on('click', 'biketrip', function (e) {
+        new mapboxgl.Popup()
+            .setLngLat(e.lngLat)
+           
+	    .setHTML(e.features.map(function(feature) { return feature.properties.Name; }).join(', '))
+	   
+	    
+	    
+            .addTo(map);
+    });
+	map.on('click', 'sop', function (e) {
+        new mapboxgl.Popup()
+            .setLngLat(e.lngLat)
+           
+	    .setHTML(e.features.map(function(feature) { return feature.properties.RouteID; }).join(', '))
+	   
+	    
+	    
+            .addTo(map);
+    });
+	map.on('click', 'drinkingwater', function (e) {
+        new mapboxgl.Popup()
+            .setLngLat(e.lngLat)
+           
+	    .setHTML(e.features.map(function(feature) { return feature.properties.amenity; }).join(', '))
+	   
+	    
+	    
+            .addTo(map);
+    });
 document.getElementById('fly').addEventListener('click', function () {
     //fly to coordinates
     map.flyTo({
         center: [
-            150.80462,
-              -33.97106],
+            150.8714,
+              -33.8524],
                speed: 0.9,
                zoom: 17,
                bearing: 270, // bearing in degrees,
     });
     
 });
-document.getElementById('fly2').addEventListener('click', function () {
+document.getElementById('fly1').addEventListener('click', function () {
     //fly to coordinates
     map.flyTo({
         center: [
-            150.8553,
-              -33.9632],
+            150.8496,
+              -33.8905],
                speed: 0.7,
                zoom: 18,
                bearing: 60, // bearing in degrees,
 			   pitch: 90
              
     });
+	-33.8905,150.8496
 });
-document.getElementById('fly_war').addEventListener('click', function () {
+document.getElementById('fly2').addEventListener('click', function () {
     //fly to coordinates
     map.flyTo({
         center: [
-           -14.2085,
-              65.0358],
+         150.91370,
+             -33.85599],
               zoom: 17,
                speed: 0.8,
                bearing: 330, // bearing in degrees,
