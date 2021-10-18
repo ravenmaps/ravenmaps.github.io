@@ -351,23 +351,23 @@ map.on('click', 'sop', function (e) {
     .addTo(map);
 });
 
-
-
 map.on('click', 'traffic street', function (e) {
-    var coordinates = e.features[0].geometry.coordinates.slice();
-    var name = e.features[0].properties.RouteID;
-    var p = e.features[0].properties.Total_Leng;
-
-    new mapboxgl.Popup()
-    .setLngLat(e.lngLat)
-    .setHTML(name + '<br>' +  p)
-    .addTo(map);
-});
-
-
+        new mapboxgl.Popup()
+            .setLngLat(e.lngLat)
+           
+        .setHTML(e.features.map(function(feature) { return feature.properties.congestion + ' traffic'; }).join(', '))
+       
+        
+        
+            .addTo(map);
+    });
 
 
 
+
+
+
+congestion
 
 map.on('click', 'biketrip', function (e) {
         new mapboxgl.Popup()
