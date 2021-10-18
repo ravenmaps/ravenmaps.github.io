@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8" />
-<title>bike trip</title>
+<title>kort - traffic</title>
 <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
 <script src="https://api.mapbox.com/mapbox-gl-js/v2.4.0/mapbox-gl.js"></script>
 <link href="https://api.mapbox.com/mapbox-gl-js/v2.4.0/mapbox-gl.css" rel="stylesheet">
@@ -20,18 +19,13 @@ type="text/css"
 <script src="https://unpkg.com/three@0.126.0/build/three.min.js"></script>
 <script src="https://unpkg.com/three@0.126.0/examples/js/loaders/GLTFLoader.js"></script>
 
-<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.0.2/mapbox-gl-directions.js"></script>
-<link
-rel="stylesheet"
-href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.0.2/mapbox-gl-directions.css"
-type="text/css"
-/>
-
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.js"></script>
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.css" type="text/css">
 
 
 <style>
-	body { margin: 0; padding: 0; }
-	#map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    body { margin: 0; padding: 0; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
 </style>
 </head>
 
@@ -99,7 +93,7 @@ type="text/css"
 
 <div id="map"></div>
 <style>
-    #fly {
+    #fly_war {
         display: block;
         position: absolute;
         bottom: 10px;
@@ -115,10 +109,10 @@ type="text/css"
         background: #ee8a65;
     }
 </style>
-<button id='fly'>western sydney regional park</button>
+<button id='fly_war'>reydarfjordur</button>
 
 <style>
-    #fly1 {
+    #fly {
         display: block;
         position: absolute;
         bottom: 55px;
@@ -136,7 +130,7 @@ type="text/css"
 </style>
     
 
-<button id='fly1'>cecil hills</button>
+<button id='fly'>Leppington Oval</button>
 
 <style>
     #fly2 {
@@ -155,7 +149,7 @@ type="text/css"
         background: #ee8a65;
     }
 </style>
-<button id='fly2'>longfellow</button>
+<button id='fly2'>School</button>
 <script>
 mapboxgl.accessToken = 'pk.eyJ1IjoidGh1bGVtYXBzIiwiYSI6ImNqM3F0Y2JnaDAxYnQzM28xZDVwazhhaDEifQ.pofHlcCOkr9OXfKsMYAAFw';
 //var bounds = [
@@ -166,12 +160,17 @@ mapboxgl.accessToken = 'pk.eyJ1IjoidGh1bGVtYXBzIiwiYSI6ImNqM3F0Y2JnaDAxYnQzM28xZ
 var map = new mapboxgl.Map({
 container: 'map',
 style: 'mapbox://styles/thulemaps/ckaq5ndaj0jy41jqkrvmiajr4',
-center: [150.8704,-33.9174],
-zoom: 12,
+center: [150.9988,-33.8670],
+zoom: 13,
 pitch:0,
 antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
 });
- 
+// map.addControl(
+//new MapboxDirections({
+//accessToken: mapboxgl.accessToken
+//}),
+//'bottom-right'
+//);
 
 map.on('load', function () {
      map.addSource('stadir', {
@@ -203,6 +202,12 @@ map.on('load', function () {
         'source-layer': 'poi',
         
     });
+
+
+  
+ 
+
+  
   
  map.addSource('contours', {
         type: 'vector',
@@ -220,14 +225,14 @@ map.on('load', function () {
         },
         'paint': {
             'line-color': '#877b59',
-            'line-width': 0.5
+            'line-width': 0.8
         }
     });
     
-	
+    
  //cycle popup blue on map
-	
-	
+    
+    
  map.addSource('walking', {
         type: 'vector',
         url: 'mapbox://thulemaps.cj625ygac111m2qjxt6eg2w5q-1ecwg'
@@ -250,32 +255,11 @@ map.on('load', function () {
 
 
         
-//cycle data
 
-    map.addSource('gtfs_pathways_time-3yo2p1', {
-        type: 'vector',
-        url: 'mapbox://thulemaps.c4190uh8'
-    });
-  map.addLayer({
-        'id': 'gtfs_pathways_time',
-        'type': 'line',
-        'source': 'gtfs_pathways_time-3yo2p1',
-        'source-layer': 'gtfs_pathways_time-3yo2p1',
-        'layout': {
-            'visibility': 'none',
-            'line-join': 'round',
-            'line-cap': 'round'
-        },
-        'paint': {
-            'line-color': 'red',
-            'line-width': 3
-        }
-    
-   
 
     
         
-    });
+    
 
    
   
@@ -306,19 +290,23 @@ map.addControl(new MapboxGeocoder({
 });
 
 // layers uppi til vinstri
-var toggleableLayerIds = ['cycle pop up', 'stations', 'gtfs_pathways_time', 'contours','biketrip','sop', 'drinkingwater'];
+var toggleableLayerIds = ['biketrip', 'sop', 'drinkingwater', 'contours', 'bikeparking','cycle pop up', 'traffic street',];
 
 for (var i = 0; i < toggleableLayerIds.length; i++) {
     var id = toggleableLayerIds[i];
+
     var link = document.createElement('a');
     link.href = '#';
     link.className = 'active';
     link.textContent = id;
+
     link.onclick = function (e) {
         var clickedLayer = this.textContent;
         e.preventDefault();
         e.stopPropagation();
+
         var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
+
         if (visibility === 'visible') {
             map.setLayoutProperty(clickedLayer, 'visibility', 'none');
             this.className = '';
@@ -327,6 +315,7 @@ for (var i = 0; i < toggleableLayerIds.length; i++) {
             map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
         }
     };
+
     var layers = document.getElementById('menu');
     layers.appendChild(link);
 }
@@ -348,83 +337,108 @@ map.addControl(new mapboxgl.GeolocateControl({
 
     // When a click event occurs on a feature in the states layer, open a popup at the
     // location of the click, with description HTML from its properties.
-    map.on('click', 'gtfs_pathways_time', function (e) {
+   
+
+
+map.on('click', 'sop', function (e) {
+    var coordinates = e.features[0].geometry.coordinates.slice();
+    var name = e.features[0].properties.RouteID;
+    var p = e.features[0].properties.Total_Leng;
+
+    new mapboxgl.Popup()
+    .setLngLat(e.lngLat)
+    .setHTML(name + '<br>' +  p)
+    .addTo(map);
+});
+
+
+
+map.on('click', 'traffic street', function (e) {
+    var coordinates = e.features[0].geometry.coordinates.slice();
+    var name = e.features[0].properties.RouteID;
+    var p = e.features[0].properties.Total_Leng;
+
+    new mapboxgl.Popup()
+    .setLngLat(e.lngLat)
+    .setHTML(name + '<br>' +  p)
+    .addTo(map);
+});
+
+
+
+
+
+
+map.on('click', 'biketrip', function (e) {
         new mapboxgl.Popup()
             .setLngLat(e.lngLat)
            
-	    .setHTML(e.features.map(function(feature) { return feature.properties.traversal_time2 + 'sec'; }).join(', '))
-	   
-	    
-	    
+        .setHTML(e.features.map(function(feature) { return feature.properties.Name ; }).join(', '))
+       
+        
+        
             .addTo(map);
     });
-	
-	map.on('click', 'biketrip', function (e) {
+
+map.on('click', 'cycle pop up', function (e) {
         new mapboxgl.Popup()
             .setLngLat(e.lngLat)
            
-	    .setHTML(e.features.map(function(feature) { return feature.properties.Name; }).join(', '))
-	   
-	    
-	    
+        .setHTML(e.features.map(function(feature) { return feature.properties.Name ; }).join(', '))
+       
+        
+        
             .addTo(map);
     });
-	map.on('click', 'sop', function (e) {
+
+map.on('click', 'drinkingwater', function (e) {
         new mapboxgl.Popup()
             .setLngLat(e.lngLat)
            
-	    .setHTML(e.features.map(function(feature) { return feature.properties.RouteID; }).join(', '))
-	   
-	    
-	    
+        .setHTML(e.features.map(function(feature) { return feature.properties.amenity ; }).join(', '))
+       
+        
+        
             .addTo(map);
-    });
-	map.on('click', 'drinkingwater', function (e) {
-        new mapboxgl.Popup()
-            .setLngLat(e.lngLat)
-           
-	    .setHTML(e.features.map(function(feature) { return feature.properties.amenity; }).join(', '))
-	   
-	    
-	    
-            .addTo(map);
-    });
+
+});
+
+
 document.getElementById('fly').addEventListener('click', function () {
     //fly to coordinates
     map.flyTo({
         center: [
-            150.8714,
-              -33.8524],
+            150.80462,
+              -33.97106],
                speed: 0.9,
                zoom: 17,
                bearing: 270, // bearing in degrees,
     });
     
 });
-document.getElementById('fly1').addEventListener('click', function () {
-    //fly to coordinates
-    map.flyTo({
-        center: [
-            150.8496,
-              -33.8905],
-               speed: 0.7,
-               zoom: 18,
-               bearing: 60, // bearing in degrees,
-			   pitch: 90
-             
-    });
-	-33.8905,150.8496
-});
 document.getElementById('fly2').addEventListener('click', function () {
     //fly to coordinates
     map.flyTo({
         center: [
-         150.91370,
-             -33.85599],
+            150.8553,
+              -33.9632],
+               speed: 0.7,
+               zoom: 18,
+               bearing: 60, // bearing in degrees,
+               pitch: 90
+             
+    });
+});
+document.getElementById('fly_war').addEventListener('click', function () {
+    //fly to coordinates
+    map.flyTo({
+        center: [
+           -14.2085,
+              65.0358],
               zoom: 17,
                speed: 0.8,
                bearing: 330, // bearing in degrees,
-			   pitch: 90,
+               pitch: 90,
     });
 
 
@@ -479,7 +493,7 @@ map.on('load', function() {
         filter: ['in', '$type', 'LineString']
     });
 
-	
+    
     
 });
 
@@ -491,16 +505,30 @@ map.addSource('mapbox-dem', {
 'maxzoom': 14
 });
 // add the DEM source as a terrain layer with exaggerated height
-map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.0 });
+map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.5 });
  
 // add a sky layer that will show when the map is highly pitched
 map.addLayer({
 'id': 'sky',
 'type': 'sky',
 'paint': {
+'sky-opacity': [
+'interpolate',
+['linear'],
+['zoom'],
+0,
+0,
+5,
+0.3,
+8,
+1
+],
+// set up the sky layer for atmospheric scattering
 'sky-type': 'atmosphere',
-'sky-atmosphere-sun': [0.0, 0.0],
-'sky-atmosphere-sun-intensity': 15
+// explicitly set the position of the sun rather than allowing the sun to be attached to the main light source
+'sky-atmosphere-sun': getSunPosition(),
+// set the intensity of the sun as a light source (0-100 with higher values corresponding to brighter skies)
+'sky-atmosphere-sun-intensity': 5
 }
 });
 });
