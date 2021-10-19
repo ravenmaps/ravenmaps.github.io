@@ -198,7 +198,7 @@ map.addControl(new MapboxGeocoder({
 });
 
 // layers uppi til vinstri
-var toggleableLayerIds = ['biketrip', 'drinkingwater', 'contours','cycle_pop_up', 'traffic street', 'bikeparking',];
+var toggleableLayerIds = ['biketrip', 'drinking water', 'traffic', 'bike parking',];
 
 for (var i = 0; i < toggleableLayerIds.length; i++) {
     var id = toggleableLayerIds[i];
@@ -279,15 +279,6 @@ map.on('click', 'biketrip', function (e) {
             .addTo(map);
     });
 
-map.on('click', 'cycle_pop_up', function (e) {
-        new mapboxgl.Popup()
-            .setLngLat(e.lngLat)
-           
-        .setHTML(e.features.map(function(feature) { return feature.properties.Name ; }).join(', '))
-       
-        
-            .addTo(map);
-    });
 
 map.on('click', 'drinkingwater', function (e) {
         new mapboxgl.Popup()
