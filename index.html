@@ -71,14 +71,7 @@ type="text/css"
     #menu a.active:hover {
         background: #3074a4;
     }
-   #marker {
-    background-image: url('https://www.mapbox.com/mapbox-gl-js/assets/washington-monument.jpg');
-    background-size: cover;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    cursor: pointer;
-}
+   
 
 
 <style>
@@ -93,47 +86,7 @@ type="text/css"
 
 <div id="map"></div>
 <style>
-    #fly_war {
-        display: block;
-        position: absolute;
-        bottom: 10px;
-        margin: 0px auto;
-        width: 10%;
-        height: 40px;
-        padding: 10px;
-        border: none;
-        border-radius: 3px;
-        font-size: 12px;
-        text-align: center;
-        color: #fff;
-        background: #ee8a65;
-    }
-</style>
-<button id='fly_war'>reydarfjordur</button>
-
-<style>
     #fly {
-        display: block;
-        position: absolute;
-        bottom: 55px;
-        margin: 0px auto;
-        width: 10%;
-        height: 40px;
-        padding: 10px;
-        border: none;
-        border-radius: 3px;
-        font-size: 12px;
-        text-align: center;
-        color: #fff;
-        background: #ee8a65;
-    }
-</style>
-    
-
-<button id='fly'>Leppington Oval</button>
-
-<style>
-    #fly2 {
         display: block;
         position: absolute;
         bottom: 100px;
@@ -149,9 +102,18 @@ type="text/css"
         background: #ee8a65;
     }
 </style>
-<button id='fly2'>School</button>
+<button id='fly'>Merrylands Station</button>
+
+
+
+
+
+
+
 <script>
 mapboxgl.accessToken = 'pk.eyJ1IjoidGh1bGVtYXBzIiwiYSI6ImNqM3F0Y2JnaDAxYnQzM28xZDVwazhhaDEifQ.pofHlcCOkr9OXfKsMYAAFw';
+
+
 //var bounds = [
    // [139.261, -36.507], // Southwest coordinates
    // [156.43, -26.93]  // Northeast coordinates
@@ -160,11 +122,14 @@ mapboxgl.accessToken = 'pk.eyJ1IjoidGh1bGVtYXBzIiwiYSI6ImNqM3F0Y2JnaDAxYnQzM28xZ
 var map = new mapboxgl.Map({
 container: 'map',
 style: 'mapbox://styles/thulemaps/ckaq5ndaj0jy41jqkrvmiajr4',
-center: [150.9988,-33.8670],
-zoom: 13,
-pitch:0,
+center: [151,-33.8670],
+zoom: 10,
+pitch:30,
 antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
 });
+
+
+
 // map.addControl(
 //new MapboxDirections({
 //accessToken: mapboxgl.accessToken
@@ -173,43 +138,7 @@ antialias: true // create the gl context with MSAA antialiasing, so custom layer
 //);
 
 map.on('load', function () {
-     map.addSource('stadir', {
-        type: 'vector',
-        url: 'mapbox://thulemaps.cj626tka6142t2qo3gdf4yv4c-8rje7'
-    });
-    map.addLayer({
-        'id': 'stations',
-        'type': 'circle',
-        'source': 'stadir',
-        'layout': {
-            'visibility': 'none'
-        },
-        'paint': {
-            'circle-radius': 3,
-            'circle-color': 'rgba(55,55,179,1)'
-        },
-        'source-layer': 'stadir'
-    });
-
-    map.addSource('poi', {
-        type: 'vector',
-        url: 'mapbox://styles/thulemaps/cj62xwmd6425s2ro5wr2c1w7k'
-    });
-    map.addLayer({
-        'id': 'poi',
-        'type': 'circle',
-        'source': 'poi',
-        'source-layer': 'poi',
-        
-    });
-
-
-  
- 
-
-  
-  
- map.addSource('contours', {
+     map.addSource('contours', {
         type: 'vector',
         url: 'mapbox://mapbox.mapbox-terrain-v2'
     });
@@ -224,34 +153,13 @@ map.on('load', function () {
             'line-cap': 'round'
         },
         'paint': {
-            'line-color': '#877b59',
+            'line-color': '#3d3d3d',
             'line-width': 0.8
         }
     });
     
     
- //cycle popup blue on map
-    
-    
- map.addSource('walking', {
-        type: 'vector',
-        url: 'mapbox://thulemaps.cj625ygac111m2qjxt6eg2w5q-1ecwg'
-    });
-    map.addLayer({
-        'id': 'cycle pop up',
-        'type': 'line',
-        'source': 'walking',
-        'source-layer': 'walking',
-        'layout': {
-            'visibility': 'visible',
-            'line-join': 'round',
-            'line-cap': 'round'
-        },
-        'paint': {
-            'line-color': 'blue',
-            'line-width': 4
-        }
-    });
+ 
 
 
         
@@ -290,7 +198,7 @@ map.addControl(new MapboxGeocoder({
 });
 
 // layers uppi til vinstri
-var toggleableLayerIds = ['biketrip', 'sop', 'drinkingwater', 'contours', 'bikeparking','cycle pop up', 'traffic street',];
+var toggleableLayerIds = ['biketrip', 'drinkingwater', 'contours','cycle_pop_up', 'traffic street', 'bikeparking',];
 
 for (var i = 0; i < toggleableLayerIds.length; i++) {
     var id = toggleableLayerIds[i];
@@ -340,16 +248,7 @@ map.addControl(new mapboxgl.GeolocateControl({
    
 
 
-map.on('click', 'sop', function (e) {
-    var coordinates = e.features[0].geometry.coordinates.slice();
-    var name = e.features[0].properties.RouteID;
-    var p = e.features[0].properties.Total_Leng;
 
-    new mapboxgl.Popup()
-    .setLngLat(e.lngLat)
-    .setHTML(name + '<br>' +  p)
-    .addTo(map);
-});
 
 map.on('click', 'traffic street', function (e) {
         new mapboxgl.Popup()
@@ -367,7 +266,7 @@ map.on('click', 'traffic street', function (e) {
 
 
 
-congestion
+
 
 map.on('click', 'biketrip', function (e) {
         new mapboxgl.Popup()
@@ -380,13 +279,12 @@ map.on('click', 'biketrip', function (e) {
             .addTo(map);
     });
 
-map.on('click', 'cycle pop up', function (e) {
+map.on('click', 'cycle_pop_up', function (e) {
         new mapboxgl.Popup()
             .setLngLat(e.lngLat)
            
         .setHTML(e.features.map(function(feature) { return feature.properties.Name ; }).join(', '))
        
-        
         
             .addTo(map);
     });
@@ -394,108 +292,48 @@ map.on('click', 'cycle pop up', function (e) {
 map.on('click', 'drinkingwater', function (e) {
         new mapboxgl.Popup()
             .setLngLat(e.lngLat)
+
+            setHTML('<h3>' + feature.properties.SUBURB + '</h3><p>' + feature.properties.TYPE + '</p>')
            
-        .setHTML(e.features.map(function(feature) { return feature.properties.amenity ; }).join(', '))
+        //.setHTML(e.features.map(function(feature) { return feature.properties.amenity + <a href="http://www.capitalpride.org/parade" target="_blank" title="Opens in a new window">Capital Pride Parade</a> ; }).join(', '))
        
-        
+       
+       
         
             .addTo(map);
 
 });
 
+map.on('click', 'bikeparking', function (e) {
+        new mapboxgl.Popup()
+            .setLngLat(e.lngLat)
+           
+        .setHTML(e.features.map(function(feature) { return 'location: ' + feature.properties.SUBURB + '<b><br>Type: ' + feature.properties.TYPE  ; }).join(', '))
+       
+        
+            .addTo(map);
 
+
+            });
 document.getElementById('fly').addEventListener('click', function () {
     //fly to coordinates
     map.flyTo({
         center: [
-            150.80462,
-              -33.97106],
-               speed: 0.9,
-               zoom: 17,
-               bearing: 270, // bearing in degrees,
-    });
-    
-});
-document.getElementById('fly2').addEventListener('click', function () {
-    //fly to coordinates
-    map.flyTo({
-        center: [
-            150.8553,
-              -33.9632],
-               speed: 0.7,
-               zoom: 18,
-               bearing: 60, // bearing in degrees,
-               pitch: 90
-             
-    });
-});
-document.getElementById('fly_war').addEventListener('click', function () {
-    //fly to coordinates
-    map.flyTo({
-        center: [
-           -14.2085,
-              65.0358],
+           150.9936,
+              -33.8363],
               zoom: 17,
                speed: 0.8,
                bearing: 330, // bearing in degrees,
-               pitch: 90,
+               pitch: 45,
     });
 
 
  });
  
-var distanceContainer = document.getElementById('distance');
-
-// GeoJSON object to hold our measurement features
-var geojson = {
-    "type": "FeatureCollection",
-    "features": []
-};
-
-// Used to draw a line between points
-var linestring = {
-    "type": "Feature",
-    "geometry": {
-        "type": "LineString",
-        "coordinates": []
-    }
-};
-
-map.on('load', function() {
-    map.addSource('geojson', {
-        "type": "geojson",
-        "data": geojson
-    });
-
-    // Add styles to the map
-    map.addLayer({
-        id: 'measure-points',
-        type: 'circle',
-        source: 'geojson',
-        paint: {
-            'circle-radius': 5,
-            'circle-color': '#000'
-        },
-        filter: ['in', '$type', 'Point']
-    });
-    map.addLayer({
-        id: 'measure-lines',
-        type: 'line',
-        source: 'geojson',
-        layout: {
-            'line-cap': 'round',
-            'line-join': 'round'
-        },
-        paint: {
-            'line-color': '#000',
-            'line-width': 2.5
-        },
-        filter: ['in', '$type', 'LineString']
-    });
 
     
     
-});
+
 
 map.on('load', () => {
 map.addSource('mapbox-dem', {
@@ -507,30 +345,7 @@ map.addSource('mapbox-dem', {
 // add the DEM source as a terrain layer with exaggerated height
 map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.5 });
  
-// add a sky layer that will show when the map is highly pitched
-map.addLayer({
-'id': 'sky',
-'type': 'sky',
-'paint': {
-'sky-opacity': [
-'interpolate',
-['linear'],
-['zoom'],
-0,
-0,
-5,
-0.3,
-8,
-1
-],
-// set up the sky layer for atmospheric scattering
-'sky-type': 'atmosphere',
-// explicitly set the position of the sun rather than allowing the sun to be attached to the main light source
-'sky-atmosphere-sun': getSunPosition(),
-// set the intensity of the sun as a light source (0-100 with higher values corresponding to brighter skies)
-'sky-atmosphere-sun-intensity': 5
-}
-});
+
 });
 
 
@@ -584,110 +399,8 @@ map.addLayer(
 labelLayerId
 );
 });
-const modelOrigin = [148.9819, -35.39847];
-const modelAltitude = 0;
-const modelRotate = [Math.PI / 2, 0, 0];
- 
-const modelAsMercatorCoordinate = mapboxgl.MercatorCoordinate.fromLngLat(
-modelOrigin,
-modelAltitude
-);
- 
-// transformation parameters to position, rotate and scale the 3D model onto the map
-const modelTransform = {
-translateX: modelAsMercatorCoordinate.x,
-translateY: modelAsMercatorCoordinate.y,
-translateZ: modelAsMercatorCoordinate.z,
-rotateX: modelRotate[0],
-rotateY: modelRotate[1],
-rotateZ: modelRotate[2],
-/* Since the 3D model is in real world meters, a scale transform needs to be
-* applied since the CustomLayerInterface expects units in MercatorCoordinates.
-*/
-scale: modelAsMercatorCoordinate.meterInMercatorCoordinateUnits()
-};
- 
-const THREE = window.THREE;
- 
-// configuration of the custom layer for a 3D model per the CustomLayerInterface
-const customLayer = {
-id: '3d-model',
-type: 'custom',
-renderingMode: '3d',
-onAdd: function (map, gl) {
-this.camera = new THREE.Camera();
-this.scene = new THREE.Scene();
- 
-// create two three.js lights to illuminate the model
-const directionalLight = new THREE.DirectionalLight(0xffffff);
-directionalLight.position.set(0, -70, 100).normalize();
-this.scene.add(directionalLight);
- 
-const directionalLight2 = new THREE.DirectionalLight(0xffffff);
-directionalLight2.position.set(0, 70, 100).normalize();
-this.scene.add(directionalLight2);
- 
-// use the three.js GLTF loader to add the 3D model to the three.js scene
-const loader = new THREE.GLTFLoader();
-loader.load(
-'https://docs.mapbox.com/mapbox-gl-js/assets/34M_17/34M_17.gltf',
-(gltf) => {
-this.scene.add(gltf.scene);
-}
-);
-this.map = map;
- 
-// use the Mapbox GL JS map canvas for three.js
-this.renderer = new THREE.WebGLRenderer({
-canvas: map.getCanvas(),
-context: gl,
-antialias: true
-});
- 
-this.renderer.autoClear = false;
-},
-render: function (gl, matrix) {
-const rotationX = new THREE.Matrix4().makeRotationAxis(
-new THREE.Vector3(1, 0, 0),
-modelTransform.rotateX
-);
-const rotationY = new THREE.Matrix4().makeRotationAxis(
-new THREE.Vector3(0, 1, 0),
-modelTransform.rotateY
-);
-const rotationZ = new THREE.Matrix4().makeRotationAxis(
-new THREE.Vector3(0, 0, 1),
-modelTransform.rotateZ
-);
- 
-const m = new THREE.Matrix4().fromArray(matrix);
-const l = new THREE.Matrix4()
-.makeTranslation(
-modelTransform.translateX,
-modelTransform.translateY,
-modelTransform.translateZ
-)
-.scale(
-new THREE.Vector3(
-modelTransform.scale,
--modelTransform.scale,
-modelTransform.scale
-)
-)
-.multiply(rotationX)
-.multiply(rotationY)
-.multiply(rotationZ);
- 
-this.camera.projectionMatrix = m.multiply(l);
-this.renderer.resetState();
-this.renderer.render(this.scene, this.camera);
-this.map.triggerRepaint();
-}
-};
- 
-map.on('style.load', () => {
-map.addLayer(customLayer, 'waterway-label');
-});
+
+
 </script>
  
 </body>
