@@ -301,7 +301,7 @@ map.on('click', 'Bike Parking', function (e) {
         new mapboxgl.Popup()
             .setLngLat(e.lngLat)
            
-        .setHTML(e.features.map(function(feature) { return 'location: ' + feature.properties.LOCATION + '<b><br>Type: ' + feature.properties.TYPE  ; }).join(', '))
+        .setHTML(e.features.map(function(feature) { return 'Location: ' + feature.properties.LOCATION + '<b><br>Type: ' + feature.properties.TYPE  ; }).join(', '))
        
         
             .addTo(map);
