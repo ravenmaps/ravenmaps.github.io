@@ -268,7 +268,7 @@ map.on('click', 'Traffic', function (e) {
 
 
 
-map.on('click', 'biketrip', function (e) {
+map.on('click', 'Bike Trip', function (e) {
         new mapboxgl.Popup()
             .setLngLat(e.lngLat)
            
@@ -301,7 +301,7 @@ map.on('click', 'Bike Parking', function (e) {
         new mapboxgl.Popup()
             .setLngLat(e.lngLat)
            
-        .setHTML(e.features.map(function(feature) { return 'location: ' + feature.properties.SUBURB + '<b><br>Type: ' + feature.properties.TYPE  ; }).join(', '))
+        .setHTML(e.features.map(function(feature) { return 'location: ' + feature.properties.LOCATION + '<b><br>Type: ' + feature.properties.TYPE  ; }).join(', '))
        
         
             .addTo(map);
