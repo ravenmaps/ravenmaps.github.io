@@ -198,7 +198,7 @@ map.addControl(new MapboxGeocoder({
 });
 
 // layers uppi til vinstri
-var toggleableLayerIds = ['biketrip', 'drinkingwater', 'traffic street', 'bikeparking',];
+var toggleableLayerIds = ['Bike Trip', 'Drinking Water', 'Traffic', 'Bike Parking',];
 
 for (var i = 0; i < toggleableLayerIds.length; i++) {
     var id = toggleableLayerIds[i];
@@ -250,7 +250,7 @@ map.addControl(new mapboxgl.GeolocateControl({
 
 
 
-map.on('click', 'traffic street', function (e) {
+map.on('click', 'Traffic', function (e) {
         new mapboxgl.Popup()
             .setLngLat(e.lngLat)
            
@@ -280,7 +280,7 @@ map.on('click', 'biketrip', function (e) {
     });
 
 
-map.on('click', 'drinkingwater', function (e) {
+map.on('click', 'Drinking Water', function (e) {
         new mapboxgl.Popup()
             .setLngLat(e.lngLat)
 
@@ -297,7 +297,7 @@ map.on('click', 'drinkingwater', function (e) {
 
 });
 
-map.on('click', 'bikeparking', function (e) {
+map.on('click', 'Bike Parking', function (e) {
         new mapboxgl.Popup()
             .setLngLat(e.lngLat)
            
