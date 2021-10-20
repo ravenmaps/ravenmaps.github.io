@@ -273,7 +273,7 @@ map.on('click', 'Bike Trip', function (e) {
             .setLngLat(e.lngLat)
            
         //.setHTML(e.features.map(function(feature) { return feature.properties.Name ; }).join(', '))
-        .setHTML(e.features.map(function(feature) { return 'Title: ' + feature.properties.Name + '<b><br>Type: ' + feature.properties.desc  ; }).join(', '))
+        .setHTML(e.features.map(function(feature) { return 'Title: ' + feature.properties.name + '<b><br>Type: ' + feature.properties.desc  ; }).join(', '))
         
         
             .addTo(map);
