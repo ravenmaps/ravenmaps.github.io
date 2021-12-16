@@ -302,7 +302,7 @@ map.on('click', 'stops', function (e) {
         new mapboxgl.Popup()
             .setLngLat(e.lngLat)
            
-        .setHTML(e.features.map(function(feature) { return 'Location: ' + feature.properties.stop_id + '<b><br>Type: ' + feature.properties.route_ids  + '<p>TfNSW - Data team.</p>' + ' <a class="image-link" href="https://ravenmaps.github.io/image2.png"><img src="https://transportnsw.info/trip#/trip?from=G206971&to=G212769&leaving=true&excludedModes=11&onlyAccessible=false&walkSpeed=0&gettingFromMode=100&gettingToMode=100&onlyOpal=false&gettingToValue=20&gettingFromValue=20&tripPreference=0&travelMode=publicTransport" width="100" height="100"></a>'; }).join(', ') )
+        .setHTML(e.features.map(function(feature) { return 'Location: ' + feature.properties.stop_id + '<b><br>Type: ' + feature.properties.route_ids + feature.properties.stop_name  ; }).join(', ') )
           
          
         
