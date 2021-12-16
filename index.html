@@ -302,7 +302,7 @@ map.on('click', 'stops', function (e) {
         new mapboxgl.Popup()
             .setLngLat(e.lngLat)
            
-        .setHTML(e.features.map(function(feature) { return 'Location: ' + feature.properties.stop_id + '<b><br>Type: ' + feature.properties.route_ids + feature.properties.stop_name  ; }).join(', ') )
+        .setHTML(e.features.map(function(feature) { return 'Location: ' + feature.properties.stop_id + '<b><br>Name:' + feature.properties.stop_name + '<b><br>Type: ' + feature.properties.route_ids ; }).join(', ') )
           
          
         
