@@ -199,7 +199,7 @@ map.addControl(new MapboxGeocoder({
 });
 
 // layers uppi til vinstri
-var toggleableLayerIds = ['stops', 'Traffic', ];
+var toggleableLayerIds = ['agency2433','stops', 'Traffic', ];
 
 for (var i = 0; i < toggleableLayerIds.length; i++) {
     var id = toggleableLayerIds[i];
@@ -269,6 +269,20 @@ map.on('click', 'stops', function (e) {
             .setLngLat(e.lngLat)
            
         .setHTML(e.features.map(function(feature) { return 'Location: ' + feature.properties.stop_id + '<b><br>Name:' + feature.properties.stop_name + '<b><br>Type: ' + feature.properties.route_ids ; }).join(', ') )
+          
+         
+        
+            .addTo(map);
+    
+      });
+
+
+
+map.on('click', 'agency2433', function (e) {
+        new mapboxgl.Popup()
+            .setLngLat(e.lngLat)
+           
+        .setHTML(e.features.map(function(feature) { return 'Location: ' + feature.properties.route_short_name + '<b><br>Name:' + feature.properties.trip_headsign + '<b><br>Type: ' + feature.properties.route_id ; }).join(', ') )
           
          
         
