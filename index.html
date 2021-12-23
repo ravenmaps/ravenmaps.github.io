@@ -282,7 +282,7 @@ map.on('click', 'agency2433', function (e) {
         new mapboxgl.Popup()
             .setLngLat(e.lngLat)
            
-        .setHTML(e.features.map(function(feature) { return feature.properties.route_short_name + '<b><br>Name:' + feature.properties.trip_headsign + '<b><br>Type: ' + feature.properties.route_id ; }).join(', ') )
+        .setHTML(e.features.map(function(feature) { return feature.properties.trip_headsign + '<b><br>Type: ' + feature.properties.route_id ; }).join(', ') )
           
          
         
