@@ -1,1 +1,4 @@
-{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"marker-color":"#7e7e7e","marker-size":"medium","marker-symbol":"","name":"reydarfjordur","link":"https://www.yr.no/en/content/2-8157034/meteogram.svg"},"geometry":{"type":"Point","coordinates":[-14.21356201171875,65.04056622164869]}}]}
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"marker-color":"#7e7e7e","marker-size":"medium","marker-symbol":"","name":"reydarfjordur","link": <a href="https://www.yr.no/en/content/2-8157034/meteogram.svg">vedur</a>},"geometry":{"type":"Point","coordinates":[-14.21356201171875,65.04056622164869]}}]}
+
+
+<a href="https://www.w3schools.com/">Visit W3Schools.com!</a>
