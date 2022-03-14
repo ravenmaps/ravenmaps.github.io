@@ -1567,6 +1567,31 @@ antialias: true // create the gl context with MSAA antialiasing, so custom layer
 	    source: { type: 'geojson', data: polygon },
 	    paint: { 'line-width': 2, 'line-color': '#4264fb' },
 	  });
+		
+		
+
+map.on('load', () => {
+map.addSource('reydo', {
+type: 'geojson',
+// Use a URL for the value for the `data` property.
+data: 'https://ravenmaps.github.io/reydo.geojson'
+});
+ 
+map.addLayer({
+'id': 'reydo',
+'type': 'circle',
+'source': 'reydo',
+'paint': {
+'circle-radius': 8,
+'circle-stroke-width': 2,
+'circle-color': 'red',
+'circle-stroke-color': 'white'
+}
+});
+
+
+		
+		
 	});
 
 }());
