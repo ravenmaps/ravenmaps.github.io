@@ -95,4 +95,10 @@ map.on('style.load', () => {
     source: { type: 'geojson', data: polygon },
     paint: { 'line-width': 2, 'line-color': '#4264fb' },
   });
+  
+  map.addControl(new mapboxgl.GeolocateControl({
+    positionOptions: {
+        enableHighAccuracy: true
+    },
+    trackUserLocation: true
 });
