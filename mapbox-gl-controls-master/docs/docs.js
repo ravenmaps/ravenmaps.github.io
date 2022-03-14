@@ -22,23 +22,7 @@ pitch:30,
 antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
 });
 
-const polygon = {
-  id: 1234567890,
-  type: 'Feature',
-  properties: {},
-  geometry: {
-    type: 'Polygon',
-    coordinates: [
-      [
-        [30.51611423492432, 50.452667766971196],
-        [30.514655113220215, 50.449006093706274],
-        [30.516843795776367, 50.44862351447756],
-        [30.518345832824707, 50.45217591688964],
-        [30.51611423492432, 50.452667766971196],
-      ],
-    ],
-  },
-};
+
 
 /* Language */
 const languageControl = new LanguageControl();
