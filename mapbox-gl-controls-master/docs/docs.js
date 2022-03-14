@@ -16,8 +16,10 @@ const languages = document.getElementById('languages');
 const map = new mapboxgl.Map({
   container: 'map',
   style: 'mapbox://styles/thulemaps/ckaq5ndaj0jy41jqkrvmiajr4',
-  zoom: 14,
-  center: [30.5234, 50.4501],
+  center: [-18.67353,65.06438],
+zoom: 6.00,
+pitch:30,
+antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
 });
 
 const polygon = {
