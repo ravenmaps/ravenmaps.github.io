@@ -1466,14 +1466,15 @@
 	    }
 	}
 
-	mapboxgl.accessToken = 'pk.eyJ1Ijoia29yeXdrYSIsImEiOiJja2p1ajdlOWozMnF2MzBtajRvOTVzZDRpIn0.nnlX7TDuZ3zuGkZGr_oA3A';
+	mapboxgl.accessToken = 'pk.eyJ1IjoidGh1bGVtYXBzIiwiYSI6ImNqM3F0Y2JnaDAxYnQzM28xZDVwazhhaDEifQ.pofHlcCOkr9OXfKsMYAAFw';
 
 	const languages = document.getElementById('languages');
 	const map = new mapboxgl.Map({
 	  container: 'map',
-	  style: 'mapbox://styles/mapbox/streets-v11',
-	  zoom: 14,
-	  center: [30.5234, 50.4501],
+	  style: 'mapbox://styles/thulemaps/ckaq5ndaj0jy41jqkrvmiajr4',
+	  zoom: 6.00,
+pitch:30,
+antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased,
 	});
 
 	const polygon = {
