@@ -1340,7 +1340,7 @@
 	            {
 	                label: 'Streets',
 	                styleName: 'Mapbox Streets',
-	                styleUrl: 'mapbox://styles/mapbox/streets-v11',
+	                styleUrl: 'mapbox://styles/thulemaps/ckaq5ndaj0jy41jqkrvmiajr4',
 	            }, {
 	                label: 'Satellite',
 	                styleName: 'Mapbox Satellite Streets',
