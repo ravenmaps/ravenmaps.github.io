@@ -1588,7 +1588,7 @@ map.addLayer({
 'circle-stroke-color': 'white'
 }
 });
-
+});
 
 		
 		
