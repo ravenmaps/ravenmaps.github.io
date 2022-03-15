@@ -20,7 +20,7 @@ body {
 
 .languages {
   position: absolute;
-  left: 50%;
+  left: 20%;
   top: 16px;
   transform: translateX(-50%);
   z-index: 1;
