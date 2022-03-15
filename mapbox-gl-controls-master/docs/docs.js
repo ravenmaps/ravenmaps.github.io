@@ -22,31 +22,7 @@ pitch:30,
 antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
 });
 
-document.getElementById('fly').addEventListener('click', function () {
-    //fly to coordinates
-    map.flyTo({
-        center: [
-           -14.22468,
-              65.03339],
-              zoom: 13,
-               speed: 0.8,
-               bearing: 2.27, // bearing in degrees,
-               pitch: 49.50,
-    });
 
-
- });
- document.getElementById('fly2').addEventListener('click', function () {
-    //fly to coordinates
-    map.flyTo({
-        center: [
-           -14.97991,
-              64.25446],
-              zoom: 13,
-               speed: 0.8,
-               bearing: 18.40, // bearing in degrees,
-               pitch: 60.50,
-    });
 
 
 
