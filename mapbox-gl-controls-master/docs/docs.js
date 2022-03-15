@@ -128,3 +128,29 @@ map.on('style.load', () => {
     },
     trackUserLocation: true
 });
+                 
+                 });
+
+
+
+map.on('load', () => {
+map.addSource('reydo', {
+type: 'geojson',
+
+data: 'https://ravenmaps.github.io/reydo.geojson'
+});
+ 
+map.addLayer({
+'id': 'reydo',
+'type': 'circle',
+'source': 'reydo',
+'paint': {
+'circle-radius': 8,
+'circle-stroke-width': 2,
+'circle-color': 'red',
+'circle-stroke-color': 'white'
+}
+});
+
+});
+                 
