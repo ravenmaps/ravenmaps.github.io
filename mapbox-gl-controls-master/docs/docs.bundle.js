@@ -1602,7 +1602,13 @@ map.addLayer({
         
             .addTo(map);
     });
-	
+	map.addControl(new MapboxGeocoder({
+    accessToken: mapboxgl.accessToken,
+    bbox: [-26,63.3,-9.8,67.69],
+ 
+
+}));
+
 	
 }());
 //# sourceMappingURL=docs.bundle.js.map
