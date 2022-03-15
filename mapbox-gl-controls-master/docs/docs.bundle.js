@@ -1594,5 +1594,15 @@ map.addLayer({
 		
 	});
 
+	map.on('click', 'reydo', function (e) {
+        new mapboxgl.Popup()
+            .setLngLat(e.lngLat)
+           
+        .setHTML(e.features.map(function(feature) { return feature.properties.link + ' <a href="https://transportnsw.info/trip#/trip?from=G206971&to=G212769&leaving=true&excludedModes=11&onlyAccessible=false&walkSpeed=0&gettingFromMode=100&gettingToMode=100&onlyOpal=false&gettingToValue=20&gettingFromValue=20&tripPreference=0&travelMode=publicTransport</a> ' ; }).join(', '))
+        
+            .addTo(map);
+    });
+	
+	
 }());
 //# sourceMappingURL=docs.bundle.js.map
