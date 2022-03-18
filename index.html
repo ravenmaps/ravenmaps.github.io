@@ -89,43 +89,6 @@ type="text/css"
 <nav id="menu"></nav>
 
 <div id="map"></div>
-<style>
-    #fly {
-        display: block;
-        position: absolute;
-        bottom: 100px;
-        margin: 0px auto;
-        width: 5%;
-        height: 40px;
-        padding: 10px;
-        border: none;
-        border-radius: 3px;
-        font-size: 12px;
-        text-align: center;
-        color: #fff;
-        background: #ee8a65;
-    }
-</style>
-<button id='fly'>Reyðarfjörður</button>
-
-<style>
-    #fly2 {
-        display: block;
-        position: absolute;
-        bottom: 150px;
-        margin: 0px auto;
-        width: 5%;
-        height: 40px;
-        padding: 10px;
-        border: none;
-        border-radius: 3px;
-        font-size: 12px;
-        text-align: center;
-        color: #fff;
-        background: #ee8a65;
-    }
-</style>
-<button id='fly2'>Vestrahorn</button>
 
 
 
@@ -143,8 +106,8 @@ mapboxgl.accessToken = 'pk.eyJ1IjoidGh1bGVtYXBzIiwiYSI6ImNqM3F0Y2JnaDAxYnQzM28xZ
 var map = new mapboxgl.Map({
 container: 'map',
 style: 'mapbox://styles/thulemaps/ckaq5ndaj0jy41jqkrvmiajr4',
-center: [-18.67353,65.06438],
-zoom: 6.00,
+center: [-14.21912, 65.00577],
+zoom: 12.00,
 pitch:30,
 antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
 });
@@ -356,37 +319,7 @@ map.on('click', 'Bike Parking', function (e) {
             });
 			
 			
-	//fly to coordinates
-
 	
-document.getElementById('fly').addEventListener('click', function () {
-    
-    map.flyTo({
-        center: [
-           -14.22468,
-              65.03339],
-              zoom: 13,
-               speed: 0.8,
-               bearing: 2.27, // bearing in degrees,
-               pitch: 49.50,
-    });
-
-
- });
- document.getElementById('fly2').addEventListener('click', function () {
-   
-    map.flyTo({
-        center: [
-           -14.97991,
-              64.25446],
-              zoom: 13,
-               speed: 0.8,
-               bearing: 18.40, // bearing in degrees,
-               pitch: 60.50,
-    });
-
-
- });
 
     
     
@@ -493,6 +426,118 @@ labelLayerId
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function updateCameraPosition(position, altitude, target) {
+const camera = map.getFreeCameraOptions();
+ 
+camera.position = mapboxgl.MercatorCoordinate.fromLngLat(
+position,
+altitude
+);
+camera.lookAtPoint(target);
+ 
+map.setFreeCameraOptions(camera);
+}
+ 
+let animationIndex = 0;
+let animationTime = 0.0;
+ 
+// wait for the terrain and sky to load before starting animations
+map.once('idle', () => {
+// linearly interpolate between two altitudes/positions based on time
+const lerp = (a, b, t) => {
+if (Array.isArray(a) && Array.isArray(b)) {
+const result = [];
+for (let i = 0; i < Math.min(a.length, b.length); i++)
+result[i] = a[i] * (1.0 - t) + b[i] * t;
+return result;
+} else {
+return a * (1.0 - t) + b * t;
+}
+};
+ 
+const animations = [
+{
+duration: 5000.0,
+animate: (phase) => {
+const start = [ -14.21912, 65.00577];
+const end = [-14.22164, 65.03277];
+const alt = [17000.0, 200.0];
+ 
+// interpolate camera position while keeping focus on a target lat/lng
+const position = lerp(start, end, phase);
+const altitude = lerp(alt[0], alt[1], phase);
+const target = [-14.22164, 65.03277];
+ 
+updateCameraPosition(position, altitude, target);
+}
+},
+
+{
+duration: 25000.0,
+animate: (phase) => {
+// create easing function for the animation
+const easeInOutQuad = (t) => {
+return t < 0.5
+? 2.0 * t * t
+: (4.0 - 2.0 * t) * t - 1.0;
+};
+const start = [-14.22164, 65.03277];
+const end = [-14.21574, 65.03776];
+const alt = [200.0, 200.0];
+const target1 = [-14.21574, 65.03776];
+const target2 = [-14.20959, 65.03451]; 
+// interpolate both the camera position and target
+const position = lerp(start, end, easeInOutQuad(phase));
+const altitude = lerp(alt[0], alt[1], phase);
+const target = lerp(target1, target2, phase);
+ 
+updateCameraPosition(position, altitude, target);
+}
+}
+];
+ 
+let lastTime = 0.0;
+function frame(time) {
+animationIndex %= animations.length;
+const current = animations[animationIndex];
+ 
+if (animationTime < current.duration) {
+// Normalize the duration between 0 and 1 to interpolate the animation
+const phase = animationTime / current.duration;
+current.animate(phase);
+}
+ 
+// Elasped time since last frame, in milliseconds
+const elapsed = time - lastTime;
+animationTime += elapsed;
+lastTime = time;
+ 
+if (animationTime > current.duration) {
+animationIndex++;
+animationTime = 0.0;
+}
+ 
+window.requestAnimationFrame(frame);
+}
+ 
+window.requestAnimationFrame(frame);
+});
 
 
 </script>
