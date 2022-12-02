@@ -16,7 +16,7 @@ const languages = document.getElementById('languages');
 const map = new mapboxgl.Map({
   container: 'map',
   style: 'mapbox://styles/thulemaps/ckaq5ndaj0jy41jqkrvmiajr4',
-  center: [150.98,-33.98],
+  center: [149.98,-33.98],
 zoom: 8.00,
 pitch:30,
 antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
