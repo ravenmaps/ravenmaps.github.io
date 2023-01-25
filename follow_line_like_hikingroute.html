@@ -55,7 +55,7 @@ map.setPitch(30);
  
 // on a regular basis, add more coordinates from the saved list and update the map
 let i = 0;
-const timer = setInterval((10) => {
+const timer = setInterval(() => {
 if (i < coordinates.length) {
 data.features[0].geometry.coordinates.push(coordinates[i]);
 map.getSource('trace').setData(data);
@@ -64,7 +64,7 @@ i++;
 } else {
 window.clearInterval(timer);
 }
-}, 300);
+}, 200);
 });
 </script>
  
