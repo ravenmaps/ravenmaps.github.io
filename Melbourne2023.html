@@ -1,0 +1,511 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Melbourne Trip 2023</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.4.0/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.4.0/mapbox-gl.css" rel="stylesheet">
+
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.min.js"></script>
+<link
+rel="stylesheet"
+href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.css"
+type="text/css"
+/>
+<!-- Promise polyfill script required to use Mapbox GL Geocoder in IE 11 -->
+<script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+<script src="https://unpkg.com/three@0.126.0/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.126.0/examples/js/loaders/GLTFLoader.js"></script>
+
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.js"></script>
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.css" type="text/css">
+
+
+<style>
+    body { margin: 0; padding: 0; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+</style>
+</head>
+
+<style>
+    #menu {
+        background: #fff;
+        position: absolute;
+        z-index: 1;
+        top: 10px;
+        left: 10px;
+        border-radius: 3px;
+        width: 120px;
+        border: 1px solid rgba(0,0,0,0.4);
+        font-family: 'Open Sans', sans-serif;
+    }
+
+    #menu a {
+        font-size: 13px;
+        color: #F70D1A;
+        display: block;
+        margin: 0;
+        padding: 0;
+        padding: 10px;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(0,0,0,0.25);
+        text-align: center;
+    }
+
+    #menu a:last-child {
+        border: none;
+    }
+
+    #menu a:hover {
+        background-color: #f8f8f8;
+        color: #404040;
+    }
+
+    #menu a.active {
+        background-color: #3887be;
+        color: #ffffff;
+    }
+
+    #menu a.active:hover {
+        background: #3074a4;
+    }
+   
+
+
+<style>
+.mapboxgl-popup {
+    max-width: 600px;
+    font: 48px/50px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    color: red;
+}
+</style>
+
+
+<nav id="menu"></nav>
+
+<div id="map"></div>
+<style>
+    #fly {
+        display: block;
+        position: absolute;
+        bottom: 100px;
+        margin: 0px auto;
+        width: 5%;
+        height: 40px;
+        padding: 10px;
+        border: none;
+        border-radius: 3px;
+        font-size: 12px;
+        text-align: center;
+        color: #fff;
+        background: #ee8a65;
+    }
+</style>
+<button id='fly'>Melbourne</button>
+
+<style>
+    #fly2 {
+        display: block;
+        position: absolute;
+        bottom: 150px;
+        margin: 0px auto;
+        width: 5%;
+        height: 40px;
+        padding: 10px;
+        border: none;
+        border-radius: 3px;
+        font-size: 12px;
+        text-align: center;
+        color: #fff;
+        background: #ee8a65;
+    }
+</style>
+<button id='fly2'>Radisson</button>
+
+<style>
+    #fly3 {
+        display: block;
+        position: absolute;
+        bottom: 200px;
+        margin: 0px auto;
+        width: 5%;
+        height: 40px;
+        padding: 10px;
+        border: none;
+        border-radius: 3px;
+        font-size: 12px;
+        text-align: center;
+        color: #fff;
+        background: #ee8a65;
+    }
+</style>
+<button id='fly3'>St Albans Dynamo</button>
+
+
+<style>
+    #fly4 {
+        display: block;
+        position: absolute;
+        bottom: 250px;
+        margin: 0px auto;
+        width: 5%;
+        height: 40px;
+        padding: 10px;
+        border: none;
+        border-radius: 3px;
+        font-size: 12px;
+        text-align: center;
+        color: #fff;
+        background: #ee8a65;
+    }
+</style>
+<button id='fly4'>Ultra Football</button>
+
+
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoidGh1bGVtYXBzIiwiYSI6ImNqM3F0Y2JnaDAxYnQzM28xZDVwazhhaDEifQ.pofHlcCOkr9OXfKsMYAAFw';
+
+
+//var bounds = [
+   // [139.261, -36.507], // Southwest coordinates
+   // [156.43, -26.93]  // Northeast coordinates
+//];
+
+var map = new mapboxgl.Map({
+container: 'map',
+style: 'mapbox://styles/thulemaps/ckaq5ndaj0jy41jqkrvmiajr4',
+center: [144.87390, -37.78379],
+zoom: 10,
+pitch:30,
+antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
+});
+
+
+
+// map.addControl(
+//new MapboxDirections({
+//accessToken: mapboxgl.accessToken
+//}),
+//'bottom-right'
+//);
+
+map.on('load', function () {
+     map.addSource('contours', {
+        type: 'vector',
+        url: 'mapbox://mapbox.mapbox-terrain-v2'
+    });
+    map.addLayer({
+        'id': 'contours',
+        'type': 'line',
+        'source': 'contours',
+        'source-layer': 'contour',
+        'layout': {
+            'visibility': 'none',
+            'line-join': 'round',
+            'line-cap': 'round'
+        },
+        'paint': {
+            'line-color': '#3d3d3d',
+            'line-width': 0.8
+        }
+    });
+    
+    
+ 
+
+
+        
+
+
+    
+        
+    
+
+   
+  
+    
+
+   
+    
+ 
+    
+    // Add zoom and rotation controls to the map.
+map.addControl(new mapboxgl.NavigationControl());
+
+// Add traffic controls to the map.
+
+
+// Add zoom and rotation controls to the map.
+map.addControl(new mapboxgl.FullscreenControl());
+map.addControl(new MapboxGeocoder({
+    accessToken: mapboxgl.accessToken,
+    bbox: [139.261, -36.507,156.43, -26.93],
+ 
+
+}));
+
+
+
+
+});
+
+// layers uppi til vinstri
+var toggleableLayerIds = ['Bike Trip', 'Drinking Water', 'pubs', 'satellite', 'Traffic', ];
+
+for (var i = 0; i < toggleableLayerIds.length; i++) {
+    var id = toggleableLayerIds[i];
+
+    var link = document.createElement('a');
+    link.href = '#';
+    link.className = 'active';
+    link.textContent = id;
+
+    link.onclick = function (e) {
+        var clickedLayer = this.textContent;
+        e.preventDefault();
+        e.stopPropagation();
+
+        var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
+
+        if (visibility === 'visible') {
+            map.setLayoutProperty(clickedLayer, 'visibility', 'none');
+            this.className = '';
+        } else {
+            this.className = 'active';
+            map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
+        }
+    };
+
+    var layers = document.getElementById('menu');
+    layers.appendChild(link);
+}
+// Add geolocate control to the map.
+map.addControl(new mapboxgl.GeolocateControl({
+    positionOptions: {
+        enableHighAccuracy: true
+    },
+    trackUserLocation: true
+    
+
+
+
+}));
+
+ 
+
+ 
+
+    // When a click event occurs on a feature in the states layer, open a popup at the
+    // location of the click, with description HTML from its properties.
+   
+
+
+
+
+map.on('click', 'Traffic', function (e) {
+        new mapboxgl.Popup()
+            .setLngLat(e.lngLat)
+           
+        .setHTML(e.features.map(function(feature) { return feature.properties.congestion + ' traffic'; }).join(', '))
+       
+        
+        
+            .addTo(map);
+    });
+
+
+
+map.on('click', 'Bike Trip', function (e) {
+        new mapboxgl.Popup()
+            .setLngLat(e.lngLat)
+           
+        //.setHTML(e.features.map(function(feature) { return feature.properties.Name ; }).join(', '))
+        .setHTML(e.features.map(function(feature) { return 'Title: ' + feature.properties.name + '<b><br>Type: ' + feature.properties.desc + ' <a href="https://transportnsw.info/trip#/trip?from=G206971&to=G212769&leaving=true&excludedModes=11&onlyAccessible=false&walkSpeed=0&gettingFromMode=100&gettingToMode=100&onlyOpal=false&gettingToValue=20&gettingFromValue=20&tripPreference=0&travelMode=publicTransport</a> ' ; }).join(', '))
+        
+        
+            .addTo(map);
+    });
+	
+	
+	map.on('click', 'Toilets', function (e) {
+        new mapboxgl.Popup()
+            .setLngLat(e.lngLat)
+           
+        //.setHTML(e.features.map(function(feature) { return feature.properties.Name ; }).join(', '))
+        .setHTML(e.features.map(function(feature) { return 'Title: ' + feature.properties.name + '<b><br>Type: ' + feature.properties.desc + ' <a href="https://transportnsw.info/trip#/trip?from=G206971&to=G212769&leaving=true&excludedModes=11&onlyAccessible=false&walkSpeed=0&gettingFromMode=100&gettingToMode=100&onlyOpal=false&gettingToValue=20&gettingFromValue=20&tripPreference=0&travelMode=publicTransport</a> ' ; }).join(', '))
+        
+        
+            .addTo(map);
+    });
+
+
+map.on('click', 'Drinking Water', function (e) {
+        new mapboxgl.Popup()
+            .setLngLat(e.lngLat)
+
+            .setHTML(e.features.map(function(feature) { return feature.properties.amenity +  ' <b><br><iframe style="display: block;" src="https://cdnres.willyweather.com.au/widget/loadView.html?id=64904" width="318" height="328" frameborder="0" scrolling="no"></iframe>' ; }).join(', ')) 
+    
+    //setHTML('<h3>' + feature.properties.SUBURB + '</h3><p>' + feature.properties.TYPE + '</p>')
+           
+       // .setHTML(e.features.map(function(feature) { return feature.properties.amenity + <a href="http://www.capitalpride.org/parade" target="_blank" title="Opens in a new window">Capital Pride Parade</a> ; }).join(', '))
+       
+       
+       
+        
+            .addTo(map);
+
+});
+
+map.on('click', 'Bike Parking', function (e) {
+        new mapboxgl.Popup()
+            .setLngLat(e.lngLat)
+           
+        .setHTML(e.features.map(function(feature) { return 'Location: ' + feature.properties.LOCATION + '<b><br>Type: ' + feature.properties.TYPE  + '<p>TfNSW - Data team.</p>' + ' <a class="image-link" href="https://www.yr.no/en/content/2-8157034/meteogram.svg"><img src="https://www.yr.no/en/content/2-8157034/meteogram.svg" width="782" height="391"></a>'; }).join(', ') )
+          
+         
+        
+            .addTo(map);
+
+
+            });
+			
+//fly to coordinates
+
+	
+document.getElementById('fly').addEventListener('click', function () {
+    
+    map.flyTo({
+        center: [144.95547, -37.80989],
+              zoom: 11.58,
+               speed: 0.8,
+               bearing: 0, // bearing in degrees,
+               pitch: 0,
+    });
+
+
+ });
+ document.getElementById('fly2').addEventListener('click', function () {
+   
+    map.flyTo({
+        center: [144.95607, -37.81052],
+              zoom: 16.27,
+               speed: 0.8,
+               bearing: -13.34, // bearing in degrees,
+               pitch: 49.15,
+    });
+ });
+	document.getElementById('fly3').addEventListener('click', function () {
+   
+    map.flyTo({
+        center: [144.81520, -37.73370],
+              zoom: 16.10,
+               speed: 0.8,
+               bearing: -13.34, // bearing in degrees,
+               pitch: 49.15,
+    });
+ });
+    
+	document.getElementById('fly4').addEventListener('click', function () {
+   
+    map.flyTo({
+        center: [144.99739, -37.80535],
+              zoom: 17.72,
+               speed: 0.8,
+               bearing: 24, // bearing in degrees,
+               pitch: 41.65,
+    });
+ });
+    
+    
+ 
+
+    
+    
+
+
+//map.on('load', () => {
+//map.addSource('mapbox-dem', {
+//'type': 'raster-dem',
+//'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
+//'tileSize': 512,
+//'maxzoom': 14
+//});
+// add the DEM source as a terrain layer with exaggerated height
+//map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.5 });
+ 
+
+//});
+
+
+
+
+map.on('load', () => {
+// Insert the layer beneath any symbol layer.
+const layers = map.getStyle().layers;
+const labelLayerId = layers.find(
+(layer) => layer.type === 'symbol' && layer.layout['text-field']
+).id;
+ 
+// The 'building' layer in the Mapbox Streets
+// vector tileset contains building height data
+// from OpenStreetMap.
+map.addLayer(
+{
+'id': 'add-3d-buildings',
+'source': 'composite',
+'source-layer': 'building',
+'filter': ['==', 'extrude', 'true'],
+'type': 'fill-extrusion',
+'minzoom': 15,
+'paint': {
+'fill-extrusion-color': '#aaa',
+ 
+// Use an 'interpolate' expression to
+// add a smooth transition effect to
+// the buildings as the user zooms in.
+'fill-extrusion-height': [
+'interpolate',
+['linear'],
+['zoom'],
+15,
+0,
+15.05,
+['get', 'height']
+],
+'fill-extrusion-base': [
+'interpolate',
+['linear'],
+['zoom'],
+15,
+0,
+15.05,
+['get', 'min_height']
+],
+'fill-extrusion-opacity': 0.6
+}
+},
+labelLayerId
+);
+
+});
+// click on map and get lat long
+ //map.on('click', function(e) {
+   // var coordinates = e.lngLat;
+    //new mapboxgl.Popup()
+      //.setLngLat(coordinates)
+      //.setHTML('you clicked here: <br/>' + coordinates)
+      //.addTo(map);
+ // });
+
+
+
+
+
+
+</script>
+ 
+</body>
+</html>
