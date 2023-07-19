@@ -1,0 +1,82 @@
+town
+center: [-14.23397, 65.04027],
+zoom: 12.91,
+pitch: 62.11,
+bearing: 0
+
+vollur yfirlit
+center: [-14.25012, 65.03524],
+zoom: 15.20,
+pitch: 0,
+bearing: -8
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+braut 1
+center: [-14.25488, 65.03337],
+zoom: 17.85,
+pitch: 55.74,
+bearing: -101.93
+
+braut 2
+center: [-14.25593, 65.03426],
+zoom: 17.83,
+pitch: 69.74,
+bearing: 12	
+				
+				
+braut 3
+center: [-14.25388, 65.03742],
+zoom: 18.27,
+pitch: 67,
+bearing: -63.20
+
+braut 4
+center: [-14.25341, 65.03743],
+zoom: 18.36,
+pitch: 75.65,
+bearing: 103.19
+
+braut 5
+center: [-14.24661, 65.03670],
+zoom: 17.13,
+pitch: 48.15,
+bearing: -95.21
+				
+				
+braut 6
+center: [-14.25306, 65.03675],
+zoom: 18.63,
+pitch: 53.83,
+bearing: -143.21
+
+braut 7
+center: [-14.25532, 65.03673],
+zoom: 17.44,
+pitch: 62.33,
+bearing: -101.61
+
+
+braut 8
+center: [-14.26061, 65.03557],
+zoom: 17.97,
+pitch: 59.21,
+bearing: 136.94
+
+
+braut 9
+center: [-14.25515, 65.03360],
+zoom: 18.63,
+pitch: 70.71,
+bearing: 91.34
