@@ -27,18 +27,18 @@
       const key = urlParams.get('key') || 'TqcFDP5nY9E0HPq9krd1';      
       const map = new maplibregl.Map({
         container: 'map', // container id
-        style: `https://api.maptiler.com/maps/outdoor-v2/style.json?key=TqcFDP5nY9E0HPq9krd1`, // style URL
-       center: [-14.11976, 64.92181], // starting position [lng, lat]
-        zoom: 9.11, // starting zoom
-        pitch: 57.50,
-        bearing: -54.40,
+        style: `https://api.maptiler.com/maps/0f175922-466c-43ed-9368-d9875e20f621/style.json?key=TqcFDP5nY9E0HPq9krd1`, // style URL
+        center: [-14.14377, 64.96737], // starting position [lng, lat]
+        zoom: 8.93, // starting zoom
+        pitch: 70,
+        bearing: -70.8,
         maxPitch: 85,
         maxZoom: 14
-      });a
+      });
       map.on('load', () => {
         map.addSource("terrain", {
           "type": "raster-dem",
-          "url": `https://api.maptiler.com/tiles/terrain-rgb-v2/tiles.json?key=${key}`
+          "url": `https://api.maptiler.com/tiles/terrain-rgb-v2/tiles.json?key=TqcFDP5nY9E0HPq9krd1`
         });
         map.setTerrain({
           source: "terrain"
