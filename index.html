@@ -34,6 +34,7 @@
         bearing: -68,
         maxPitch: 83.5,
         maxZoom: 14
+
       });
       map.on('load', () => {
         map.addSource("terrain", {
@@ -41,12 +42,20 @@
           "url": `https://api.maptiler.com/tiles/terrain-rgb-v2/tiles.json?key=TqcFDP5nY9E0HPq9krd1`
         });
         map.setTerrain({
-          source: "terrain"
+          source: "terrain",
+          exaggeration: 1.5,
         });
+
       });
-      map.on('error', function(err) {
-        throw new Error("To load the map, you must replace YOUR_MAPTILER_API_KEY_HERE first, see README");
-      });
+   // Add zoom and rotation controls to the map.
+    map.addControl(new maplibregl.NavigationControl({
+        visualizePitch: true,
+        visualizeRoll: true,
+        showZoom: true,
+        showCompass: true
+    }));
+
+
   </script>
 </body>
 </html>
