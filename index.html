@@ -380,52 +380,55 @@ map.on('click', 'traffic', function (e) {
 	
 const MAPILLARY_TOKEN = "MLY|25284089057948616|741f6dde55deedb7fefe14f88ebc0a2a";
 
-map.on('click', 'routes per stop', async function (e) {
-
+map.on('click', 'routes per stop', function (e) {
     const lat = e.lngLat.lat;
     const lng = e.lngLat.lng;
 
-    // Fetch the nearest Mapillary image
-    let mapillaryHTML = '';
-    try {
-        const response = await fetch(
-            `https://graph.mapillary.com/images?access_token=${MAPILLARY_TOKEN}&fields=id,thumb_256_url&closeto=${lng},${lat}&limit=1`
-        );
-        const data = await response.json();
-        if (data.data && data.data.length > 0) {
-            const image = data.data[0];
-            const imageUrl = image.thumb_256_url;
-            const viewerLink = `https://www.mapillary.com/app/?pKey=${image.id}`;
+    // For each feature (stop) clicked
+    e.features.forEach(async function(feature) {
+        let mapillaryHTML = '';
 
-            mapillaryHTML = `
-                <b>Mapillary:</b><br>
-                <a href="${viewerLink}" target="_blank">
-                    <img src="${imageUrl}" style="width:100%; border-radius:4px;">
-                </a>
-            `;
-        } else {
-            mapillaryHTML = '<b>Mapillary:</b> No image found nearby.';
+        try {
+            // Fetch nearest Mapillary image
+            const response = await fetch(
+                `https://graph.mapillary.com/images?access_token=YOUR_TOKEN&fields=id,thumb_256_url&closeto=${lng},${lat}&radius=200&limit=1
+`
+            );
+            const data = await response.json();
+
+            if (data.data && data.data.length > 0) {
+                const image = data.data[0];
+                const imageUrl = image.thumb_256_url;
+                const viewerLink = `https://www.mapillary.com/app/?pKey=${image.id}`;
+
+                mapillaryHTML = `
+                    <b>Mapillary:</b><br>
+                    <a href="${viewerLink}" target="_blank">
+                        <img src="${imageUrl}" style="width:100%; border-radius:4px;">
+                    </a>
+                `;
+            } else {
+                mapillaryHTML = '<b>Mapillary:</b> No image found nearby.';
+            }
+        } catch (err) {
+            console.error(err);
+            mapillaryHTML = '<b>Mapillary:</b> Error fetching image.';
         }
-    } catch (err) {
-        console.error(err);
-        mapillaryHTML = '<b>Mapillary:</b> Error fetching image.';
-    }
 
-    const popupHTML = e.features.map(function(feature) {
-        return `
+        // Create popup **after** fetching image
+        const popupHTML = `
             <b>TSN:</b> ${feature.properties.stop_id}<br>
             <b>Routes:</b> ${feature.properties.route_short_name}<br>
             <a href="https://www.transportnsw.info/trip/" target="_blank">Trip Planner</a><br><br>
             ${mapillaryHTML}
         `;
-    }).join('<hr>');
 
-    new mapboxgl.Popup()
-        .setLngLat(e.lngLat)
-        .setHTML(popupHTML)
-        .addTo(map);
+        new mapboxgl.Popup()
+            .setLngLat([lng, lat])
+            .setHTML(popupHTML)
+            .addTo(map);
+    });
 });
-
 
 
 
