@@ -129,7 +129,7 @@ container: 'map',
 style: 'mapbox://styles/thulemaps/clbakxwlt001a15uykj4gmsd3',
 projection: 'globe', // Display the map as a globe, since satellite-v9 defaults to Mercator
 center: [150.98, -33.898],
-zoom: 12,
+zoom: 8,
 //pitch:30,
 //antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
 });
@@ -384,51 +384,61 @@ map.on('click', 'routes per stop', function (e) {
     const lat = e.lngLat.lat;
     const lng = e.lngLat.lng;
 
-    // For each feature (stop) clicked
-    e.features.forEach(async function(feature) {
-        let mapillaryHTML = '';
+    // Use for...of to handle async fetch properly
+    (async () => {
+        for (const feature of e.features) {
+            let mapillaryHTML = '';
 
-        try {
-            // Fetch nearest Mapillary image
-            const response = await fetch(
-                `https://graph.mapillary.com/images?access_token=YOUR_TOKEN&fields=id,thumb_256_url&closeto=${lng},${lat}&radius=200&limit=1
-`
-            );
-            const data = await response.json();
+            try {
+                // Define small bbox around the stop (~200m)
+                const offset = 0.0045; // ~200m in degrees
+                const bbox = [
+                    lng - offset, // min lng
+                    lat - offset, // min lat
+                    lng + offset, // max lng
+                    lat + offset  // max lat
+                ];
 
-            if (data.data && data.data.length > 0) {
-                const image = data.data[0];
-                const imageUrl = image.thumb_256_url;
-                const viewerLink = `https://www.mapillary.com/app/?pKey=${image.id}`;
+                // Fetch nearest Mapillary image using bbox
+                const url = `https://graph.mapillary.com/images?access_token=${MAPILLARY_TOKEN}&fields=id,thumb_256_url&bbox=${bbox.join(',')}&limit=1`;
+                const response = await fetch(url);
+                const data = await response.json();
 
-                mapillaryHTML = `
-                    <b>Mapillary:</b><br>
-                    <a href="${viewerLink}" target="_blank">
-                        <img src="${imageUrl}" style="width:100%; border-radius:4px;">
-                    </a>
-                `;
-            } else {
-                mapillaryHTML = '<b>Mapillary:</b> No image found nearby.';
+                if (data.data && data.data.length > 0) {
+                    const image = data.data[0];
+                    const imageUrl = image.thumb_256_url;
+                    const viewerLink = `https://www.mapillary.com/app/?pKey=${image.id}`;
+
+                    mapillaryHTML = `
+                        <b>Mapillary:</b><br>
+                        <a href="${viewerLink}" target="_blank">
+                            <img src="${imageUrl}" style="width:100%; border-radius:4px;">
+                        </a>
+                    `;
+                } else {
+                    mapillaryHTML = '<b>Mapillary:</b> No image found nearby.';
+                }
+            } catch (err) {
+                console.error(err);
+                mapillaryHTML = '<b>Mapillary:</b> Error fetching image.';
             }
-        } catch (err) {
-            console.error(err);
-            mapillaryHTML = '<b>Mapillary:</b> Error fetching image.';
+
+            // Create popup after fetching image
+            const popupHTML = `
+                <b>TSN:</b> ${feature.properties.stop_id}<br>
+                <b>Routes:</b> ${feature.properties.route_short_name}<br>
+                <a href="https://www.transportnsw.info/trip/" target="_blank">Trip Planner</a><br><br>
+                ${mapillaryHTML}
+            `;
+
+            new mapboxgl.Popup()
+                .setLngLat([lng, lat])
+                .setHTML(popupHTML)
+                .addTo(map);
         }
-
-        // Create popup **after** fetching image
-        const popupHTML = `
-            <b>TSN:</b> ${feature.properties.stop_id}<br>
-            <b>Routes:</b> ${feature.properties.route_short_name}<br>
-            <a href="https://www.transportnsw.info/trip/" target="_blank">Trip Planner</a><br><br>
-            ${mapillaryHTML}
-        `;
-
-        new mapboxgl.Popup()
-            .setLngLat([lng, lat])
-            .setHTML(popupHTML)
-            .addTo(map);
-    });
+    })();
 });
+
 
 
 
