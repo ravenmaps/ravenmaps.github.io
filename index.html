@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,553 +6,216 @@
 <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
 <script src="https://api.mapbox.com/mapbox-gl-js/v2.4.0/mapbox-gl.js"></script>
 <link href="https://api.mapbox.com/mapbox-gl-js/v2.4.0/mapbox-gl.css" rel="stylesheet">
-
 <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.min.js"></script>
-<link
-rel="stylesheet"
-href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.css"
-type="text/css"
-/>
-<!-- Promise polyfill script required to use Mapbox GL Geocoder in IE 11 -->
-<script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
-<script src="https://unpkg.com/three@0.126.0/build/three.min.js"></script>
-<script src="https://unpkg.com/three@0.126.0/examples/js/loaders/GLTFLoader.js"></script>
-
-<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.js"></script>
-<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.css" type="text/css">
-
+<link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.css" rel="stylesheet"/>
+<script src="https://unpkg.com/mapillary-js@4.0.0/dist/mapillary.min.js"></script>
+<link href="https://unpkg.com/mapillary-js@4.0.0/dist/mapillary.min.css" rel="stylesheet"/>
 
 <style>
-    body { margin: 0; padding: 0; }
-    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+body { margin: 0; padding: 0; }
+#map { position: absolute; top: 0; bottom: 0; width: 100%; }
+#menu {
+    background: #ccf2ff;
+    position: absolute;
+    z-index: 1;
+    top: 10px;
+    left: 10px;
+    border-radius: 3px;
+    width: 100px;
+    border: 1px solid rgba(0,0,0,0.4);
+    font-family: 'Open Sans', sans-serif;
+}
+#menu a {
+    font-size: 13px;
+    color: #F70D1A;
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(0,0,0,0.25);
+    text-align: center;
+}
+#menu a:last-child { border: none; }
+#menu a:hover { background-color: #ccf2ff; color: #404040; }
+#menu a.active { background-color: #3887be; color: #ffffff; }
+#menu a.active:hover { background: #3074a4; }
+#fly {
+    display: block;
+    position: absolute;
+    bottom: 100px;
+    margin: 0 auto;
+    width: 10%;
+    height: 40px;
+    padding: 10px;
+    border: none;
+    border-radius: 3px;
+    font-size: 12px;
+    text-align: center;
+    color: #fff;
+    background: #ee8a65;
+}
+.mapboxgl-popup { max-width: 800px; font: 14px/16px 'Helvetica Neue', Arial, Helvetica, sans-serif; color: red; }
 </style>
 </head>
 
-<style>
-    #menu {
-        background: #ccf2ff;
-        position: absolute;
-        z-index: 1;
-        top: 10px;
-        left: 10px;
-        border-radius: 3px;
-        width: 100px;
-        border: 1px solid rgba(0,0,0,0.4);
-        font-family: 'Open Sans', sans-serif;
-    }
-
-	
-	
-	
-    #menu a {
-        font-size: 13px;
-        color: #F70D1A;
-        display: block;
-        margin: 0;
-        padding: 0;
-        padding: 10px;
-        text-decoration: none;
-        border-bottom: 1px solid rgba(0,0,0,0.25);
-        text-align: center;
-    }
-
-    #menu a:last-child {
-        border: none;
-    }
-
-    #menu a:hover {
-        background-color: ccf2ff;
-        color: #404040;
-    }
-
-    #menu a.active {
-        background-color: #3887be;
-        color: #ffffff;
-    }
-
-    #menu a.active:hover {
-        background: #3074a4;
-    }
-   
-
-
-<style>
-mapboxgl-popup {
-    max-width: 800px;
-    font: 48px/50px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-    color: red;
-}
-</style>
-
-
+<body>
 <nav id="menu"></nav>
-
 <div id="map"></div>
-<style>
-    #fly {
-        display: block;
-        position: absolute;
-        bottom: 100px;
-        margin: 0px auto;
-        width: 10%;
-        height: 40px;
-        padding: 10px;
-        border: none;
-        border-radius: 3px;
-        font-size: 12px;
-        text-align: center;
-        color: #fff;
-        background: #ee8a65;
-    }
-</style>
 <button id='fly'>Sydney</button>
-
-
-
-
-
-
 
 <script>
 mapboxgl.accessToken = 'pk.eyJ1IjoidGh1bGVtYXBzIiwiYSI6ImNqM3F0Y2JnaDAxYnQzM28xZDVwazhhaDEifQ.pofHlcCOkr9OXfKsMYAAFw';
 
-
-//var bounds = [
-   // [139.261, -36.507], // Southwest coordinates
-   // [156.43, -26.93]  // Northeast coordinates
-//];
-
-var map = new mapboxgl.Map({
-container: 'map',
-style: 'mapbox://styles/thulemaps/clbakxwlt001a15uykj4gmsd3',
-projection: 'globe', // Display the map as a globe, since satellite-v9 defaults to Mercator
-center: [150.98, -33.898],
-zoom: 8,
-//pitch:30,
-//antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
+const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/thulemaps/clbakxwlt001a15uykj4gmsd3',
+    projection: 'globe',
+    center: [150.98, -33.898],
+    zoom: 8
 });
 
-   
-function forwardGeocoder(query) {
-        const matchingFeatures = [];
-        for (const feature of customData.features) {
-            // Handle queries with different capitalization
-            // than the source data by calling toLowerCase().
-            if (
-                feature.properties.stop_id
-                    .toLowerCase()
-                    .includes(query.toLowerCase())
-            ) {
-                // Add a tree emoji as a prefix for custom
-                // data results using carmen geojson format:
-                // https://github.com/mapbox/carmen/blob/master/carmen-geojson.md
-                feature['place_name'] = `🌲 ${feature.properties.stop_id}`;
-                feature['center'] = feature.geometry.coordinates;
-                feature['place_type'] = ['park'];
-                matchingFeatures.push(feature);
-            }
-        }
-        return matchingFeatures;
-    }
-
-
-
-
-// map.addControl(
-//new MapboxDirections({
-//accessToken: mapboxgl.accessToken
-//}),
-//'bottom-right'
-//);
-
-map.on('load', function () {
-     map.addSource('contours', {
-        type: 'vector',
-        url: 'mapbox://mapbox.mapbox-terrain-v2'
-    });
-    map.addLayer({
-        'id': 'contours',
-        'type': 'line',
-        'source': 'contours',
-        'source-layer': 'contour',
-        'layout': {
-            'visibility': 'none',
-            'line-join': 'round',
-            'line-cap': 'round'
-        },
-        'paint': {
-            'line-color': '#3d3d3d',
-            'line-width': 0.8
-        }
-    });
-	
-map.on('load', () => {
-map.addSource('earthquakes', {
-type: 'geojson',
-// Use a URL for the value for the `data` property.
-data: 'https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson'
-});
- 
-map.addLayer({
-'id': 'earthquakes-layer',
-'type': 'circle',
-'source': 'earthquakes',
-'paint': {
-'circle-radius': 10,
-'circle-stroke-width': 2,
-'circle-color': 'red',
-'circle-stroke-color': 'white'
-}
-});
-    
-});
-
-        
-
-
-    
-        
-    
-
-   
-  
-    
-
-   
-    
- 
-    
-    // Add zoom and rotation controls to the map.
-map.addControl(new mapboxgl.NavigationControl());
-
-// Add traffic controls to the map.
-
-
-// Add zoom and rotation controls to the map.
-map.addControl(new mapboxgl.FullscreenControl());
-// Load custom data to supplement the search results.
+// Sample points
 const customData = {
-'features': [
-{
-'type': 'Feature',
-'properties': {
-'title': 'Lincoln Park is special'
-},
-'geometry': {
-'coordinates': [-87.637596, 41.940403],
-'type': 'Point'
-}
-},
-{
-'type': 'Feature',
-'properties': {
-'title': 'Burnham Park is special'
-},
-'geometry': {
-'coordinates': [-87.603735, 41.829985],
-'type': 'Point'
-}
-},
-{
-'type': 'Feature',
-'properties': {
-'title': 'Millennium Park is special'
-},
-'geometry': {
-'coordinates': [-87.622554, 41.882534],
-'type': 'Point'
-}
-}
-],
-'type': 'FeatureCollection'
+    'type': 'FeatureCollection',
+    'features': [
+        { 'type': 'Feature', 'properties': { 'title': 'Lincoln Park is special' }, 'geometry': { 'type': 'Point', 'coordinates': [-87.637596, 41.940403] } },
+        { 'type': 'Feature', 'properties': { 'title': 'Burnham Park is special' }, 'geometry': { 'type': 'Point', 'coordinates': [-87.603735, 41.829985] } },
+        { 'type': 'Feature', 'properties': { 'title': 'Millennium Park is special' }, 'geometry': { 'type': 'Point', 'coordinates': [-87.622554, 41.882534] } }
+    ]
 };
- 
+
 function forwardGeocoder(query) {
-const matchingFeatures = [];
-for (const feature of customData.features) {
-// Handle queries with different capitalization
-// than the source data by calling toLowerCase().
-if (
-feature.properties.title
-.toLowerCase()
-.includes(query.toLowerCase())
-) {
-// Add a tree emoji as a prefix for custom
-// data results using carmen geojson format:
-// https://github.com/mapbox/carmen/blob/master/carmen-geojson.md
-feature['place_name'] = `?? ${feature.properties.title}`;
-feature['center'] = feature.geometry.coordinates;
-feature['place_type'] = ['park'];
-matchingFeatures.push(feature);
+    const matchingFeatures = [];
+    for (const feature of customData.features) {
+        if (feature.properties.title.toLowerCase().includes(query.toLowerCase())) {
+            feature['place_name'] = `🌲 ${feature.properties.title}`;
+            feature['center'] = feature.geometry.coordinates;
+            feature['place_type'] = ['park'];
+            matchingFeatures.push(feature);
+        }
+    }
+    return matchingFeatures;
 }
-}
-return matchingFeatures;
-}
- 
-// Add the control to the map.
-map.addControl(
-new MapboxGeocoder({
-accessToken: mapboxgl.accessToken,
-localGeocoder: forwardGeocoder,
-zoom: 14,
-placeholder: 'Enter search e.g. Lincoln Park',
-mapboxgl: mapboxgl
-})
-);
 
+// Map Controls
+map.addControl(new mapboxgl.NavigationControl());
+map.addControl(new mapboxgl.FullscreenControl());
+map.addControl(new MapboxGeocoder({
+    accessToken: mapboxgl.accessToken,
+    localGeocoder: forwardGeocoder,
+    zoom: 14,
+    placeholder: 'Enter search e.g. Lincoln Park',
+    mapboxgl: mapboxgl
+}));
+map.addControl(new mapboxgl.GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: true }));
 
+// DEM Terrain & layer
+map.on('load', () => {
+    map.addSource('mapbox-dem', { 'type': 'raster-dem', 'url': 'mapbox://mapbox.mapbox-terrain-dem-v1', 'tileSize': 512, 'maxzoom': 14 });
+    map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.0 });
 
+    map.addSource('routes-per-stop', { type: 'geojson', data: customData });
 
+    map.addLayer({
+        id: 'routes per stop',
+        type: 'circle',
+        source: 'routes-per-stop',
+        paint: {
+            'circle-radius': 8,
+            'circle-color': '#FF0000',
+            'circle-stroke-width': 2,
+            'circle-stroke-color': '#FFFFFF'
+        }
+    });
 });
 
-// layers uppi til vinstri
-var toggleableLayerIds = ['routes per stop', 'satellite', 'traffic', 'contours' ];
+// Fly button
+document.getElementById('fly').addEventListener('click', () => {
+    map.flyTo({ center: [151.0652, -33.8468], zoom: 10, speed: 0.8, bearing: 0, pitch: 10 });
+});
 
-for (var i = 0; i < toggleableLayerIds.length; i++) {
-    var id = toggleableLayerIds[i];
-
-    var link = document.createElement('a');
+// Toggleable Layers
+const toggleableLayerIds = ['routes per stop', 'satellite', 'traffic', 'contours'];
+toggleableLayerIds.forEach(id => {
+    const link = document.createElement('a');
     link.href = '#';
     link.className = 'inactive';
     link.textContent = id;
-
     link.onclick = function (e) {
-        var clickedLayer = this.textContent;
-        e.preventDefault();
-        e.stopPropagation();
-
-        var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
-
-        if (visibility === 'visible') {
-            map.setLayoutProperty(clickedLayer, 'visibility', 'none');
-            this.className = '';
-        } else {
-            this.className = 'active';
-            map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
-        }
+        e.preventDefault(); e.stopPropagation();
+        const visibility = map.getLayoutProperty(id, 'visibility');
+        if (visibility === 'visible') { map.setLayoutProperty(id, 'visibility', 'none'); this.className = ''; } 
+        else { this.className = 'active'; map.setLayoutProperty(id, 'visibility', 'visible'); }
     };
+    document.getElementById('menu').appendChild(link);
+});
 
-    var layers = document.getElementById('menu');
-    layers.appendChild(link);
-}
-// Add geolocate control to the map.
-map.addControl(new mapboxgl.GeolocateControl({
-    positionOptions: {
-        enableHighAccuracy: true
-    },
-    trackUserLocation: true
-    
+// Mapillary Setup
+const MAPILLARY_TOKEN = "MLY|25284089057948616|741f6dde55deedb7fefe14f88ebc0a2c";
 
+map.on('click', 'routes per stop', async (e) => {
+    const { lng, lat } = e.lngLat;
+    const feature = e.features[0];
+    const viewerId = `mly-${Date.now()}`;
 
+    // Create popup with placeholder
+    const popup = new mapboxgl.Popup({ maxWidth: '800px' })
+        .setLngLat([lng, lat])
+        .setHTML(`
+            <b>Title:</b> ${feature.properties.title}<br><br>
+            <b>Street view (Mapillary)</b><br>
+            <div id="${viewerId}" style="width:100%; height:300px;">Loading nearest image...</div>
+        `)
+        .addTo(map);
 
-}));
+    setTimeout(async () => {
+        try {
+            // 500m search radius
+            const searchRadius = 500; 
+            const deltaLat = searchRadius / 110540;
+            const deltaLng = searchRadius / (111320 * Math.cos(lat * Math.PI / 180));
+            const minLat = lat - deltaLat;
+            const maxLat = lat + deltaLat;
+            const minLng = lng - deltaLng;
+            const maxLng = lng + deltaLng;
 
- 
+            const resp = await fetch(`https://graph.mapillary.com/images?access_token=${MAPILLARY_TOKEN}&fields=id,geometry&bbox=${minLng},${minLat},${maxLng},${maxLat}&limit=50`);
+            const data = await resp.json();
 
- 
-
-    // When a click event occurs on a feature in the states layer, open a popup at the
-    // location of the click, with description HTML from its properties.
-   
-
-
-
-
-map.on('click', 'traffic', function (e) {
-        new mapboxgl.Popup()
-            .setLngLat(e.lngLat)
-           
-        .setHTML(e.features.map(function(feature) { return feature.properties.congestion + ' traffic'; }).join(', '))
-       
-        
-        
-            .addTo(map);
-    });
-
-
-
-
-
-
-	
-	
-const MAPILLARY_TOKEN = "MLY|25284089057948616|741f6dde55deedb7fefe14f88ebc0a2a";
-
-map.on('click', 'routes per stop', function (e) {
-    const lat = e.lngLat.lat;
-    const lng = e.lngLat.lng;
-
-    // Use for...of to handle async fetch properly
-    (async () => {
-        for (const feature of e.features) {
-            let mapillaryHTML = '';
-
-            try {
-                // Define small bbox around the stop (~200m)
-                const offset = 0.0045; // ~200m in degrees
-                const bbox = [
-                    lng - offset, // min lng
-                    lat - offset, // min lat
-                    lng + offset, // max lng
-                    lat + offset  // max lat
-                ];
-
-                // Fetch nearest Mapillary image using bbox
-                const url = `https://graph.mapillary.com/images?access_token=${MAPILLARY_TOKEN}&fields=id,thumb_256_url&bbox=${bbox.join(',')}&limit=1`;
-                const response = await fetch(url);
-                const data = await response.json();
-
-                if (data.data && data.data.length > 0) {
-                    const image = data.data[0];
-                    const imageUrl = image.thumb_256_url;
-                    const viewerLink = `https://www.mapillary.com/app/?pKey=${image.id}`;
-
-                    mapillaryHTML = `
-                        <b>Mapillary:</b><br>
-                        <a href="${viewerLink}" target="_blank">
-                            <img src="${imageUrl}" style="width:100%; border-radius:4px;">
-                        </a>
-                    `;
-                } else {
-                    mapillaryHTML = '<b>Mapillary:</b> No image found nearby.';
-                }
-            } catch (err) {
-                console.error(err);
-                mapillaryHTML = '<b>Mapillary:</b> Error fetching image.';
+            if (!data.data || data.data.length === 0) {
+                document.getElementById(viewerId).innerHTML = 'No Mapillary images nearby.';
+                return;
             }
 
-            // Create popup after fetching image
-            const popupHTML = `
-                <b>TSN:</b> ${feature.properties.stop_id}<br>
-                <b>Routes:</b> ${feature.properties.route_short_name}<br>
-                <a href="https://www.transportnsw.info/trip/" target="_blank">Trip Planner</a><br><br>
-                ${mapillaryHTML}
-            `;
+            // Compute distances and find closest
+            const nearby = data.data
+                .filter(img => img.geometry && img.geometry.coordinates)
+                .map(img => {
+                    const [imgLng, imgLat] = img.geometry.coordinates;
+                    const dx = (imgLng - lng) * 111320 * Math.cos(lat * Math.PI / 180);
+                    const dy = (imgLat - lat) * 110540;
+                    return { ...img, distance: Math.sqrt(dx*dx + dy*dy) };
+                })
+                .sort((a,b) => a.distance - b.distance);
 
-            new mapboxgl.Popup()
-                .setLngLat([lng, lat])
-                .setHTML(popupHTML)
-                .addTo(map);
-        }
-    })();
-});
+            const closest = nearby[0];
+            const distance = closest.distance.toFixed(1);
 
+            document.getElementById(viewerId).innerHTML = `<b>Nearest image:</b> ${distance} m away<br><div id="${viewerId}-viewer" style="width:100%; height:300px;"></div>`;
 
-
-
-map.on('click', 'Bike Parking', function (e) {
-        new mapboxgl.Popup()
-            .setLngLat(e.lngLat)
-           
-        .setHTML(e.features.map(function(feature) { return 'Location: ' + feature.properties.LOCATION + '<b><br>Type: ' + feature.properties.TYPE  + '<p>TfNSW - Data team.</p>' + ' <a class="image-link" href="https://ravenmaps.github.io/image2.png"><img src="https://ravenmaps.github.io/image2.png" width="100" height="100"></a>'; }).join(', ') )
-          
-         
-        
-            .addTo(map);
-
-
+            new mapillary.Viewer({
+                container: `${viewerId}-viewer`,
+                accessToken: MAPILLARY_TOKEN,
+                imageId: closest.id,
+                component: { attribution: false, cover: false, direction: true, zoom: true }
             });
-document.getElementById('fly').addEventListener('click', function () {
-    //fly to coordinates
-    map.flyTo({
-        center: [
-           151.0652,
-             -33.8468],
-              zoom: 10,
-               speed: 0.8,
-               bearing: 0, // bearing in degrees,
-               pitch: 10,
-    });
 
-
- });
- 
-
-    
-    
-
-
-map.on('load', () => {
-map.addSource('mapbox-dem', {
-'type': 'raster-dem',
-'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
-'tileSize': 512,
-'maxzoom': 14
+        } catch (err) {
+            console.error(err);
+            document.getElementById(viewerId).innerHTML = 'Failed to load Mapillary image.';
+        }
+    }, 200);
 });
-// add the DEM source as a terrain layer with exaggerated height
-map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.0 });
- 
-
-});
-
-
-
-
-map.on('load', () => {
-// Insert the layer beneath any symbol layer.
-const layers = map.getStyle().layers;
-const labelLayerId = layers.find(
-(layer) => layer.type === 'symbol' && layer.layout['text-field']
-).id;
- 
-// The 'building' layer in the Mapbox Streets
-// vector tileset contains building height data
-// from OpenStreetMap.
-map.addLayer(
-{
-'id': 'add-3d-buildings',
-'source': 'composite',
-'source-layer': 'building',
-'filter': ['==', 'extrude', 'true'],
-'type': 'fill-extrusion',
-'minzoom': 15,
-'paint': {
-'fill-extrusion-color': '#aaa',
- 
-// Use an 'interpolate' expression to
-// add a smooth transition effect to
-// the buildings as the user zooms in.
-'fill-extrusion-height': [
-'interpolate',
-['linear'],
-['zoom'],
-15,
-0,
-15.05,
-['get', 'height']
-],
-'fill-extrusion-base': [
-'interpolate',
-['linear'],
-['zoom'],
-15,
-0,
-15.05,
-['get', 'min_height']
-],
-'fill-extrusion-opacity': 0.6
-}
-},
-labelLayerId
-);
-
-});
-
- //map.on('click', function(e) {
-  // var coordinates = e.lngLat;
-   //new mapboxgl.Popup()
-//.setLngLat(coordinates)
-  // .setHTML('you clicked here: <br/>' + coordinates)
-  //  .addTo(map);
- //});
-
-
-
-
-
-
 </script>
- 
 </body>
 </html>
+
