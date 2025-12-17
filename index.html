@@ -6,58 +6,67 @@
 <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
 <script src="https://api.mapbox.com/mapbox-gl-js/v2.4.0/mapbox-gl.js"></script>
 <link href="https://api.mapbox.com/mapbox-gl-js/v2.4.0/mapbox-gl.css" rel="stylesheet">
+
 <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.min.js"></script>
-<link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.css" rel="stylesheet"/>
-<script src="https://unpkg.com/mapillary-js@4.0.0/dist/mapillary.min.js"></script>
-<link href="https://unpkg.com/mapillary-js@4.0.0/dist/mapillary.min.css" rel="stylesheet"/>
+<link
+rel="stylesheet"
+href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.css"
+type="text/css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+<script src="https://unpkg.com/three@0.126.0/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.126.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.js"></script>
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.css" type="text/css">
 
 <style>
-body { margin: 0; padding: 0; }
-#map { position: absolute; top: 0; bottom: 0; width: 100%; }
-#menu {
-    background: #ccf2ff;
-    position: absolute;
-    z-index: 1;
-    top: 10px;
-    left: 10px;
-    border-radius: 3px;
-    width: 100px;
-    border: 1px solid rgba(0,0,0,0.4);
-    font-family: 'Open Sans', sans-serif;
-}
-#menu a {
-    font-size: 13px;
-    color: #F70D1A;
-    display: block;
-    padding: 10px;
-    text-decoration: none;
-    border-bottom: 1px solid rgba(0,0,0,0.25);
-    text-align: center;
-}
-#menu a:last-child { border: none; }
-#menu a:hover { background-color: #ccf2ff; color: #404040; }
-#menu a.active { background-color: #3887be; color: #ffffff; }
-#menu a.active:hover { background: #3074a4; }
-#fly {
-    display: block;
-    position: absolute;
-    bottom: 100px;
-    margin: 0 auto;
-    width: 10%;
-    height: 40px;
-    padding: 10px;
-    border: none;
-    border-radius: 3px;
-    font-size: 12px;
-    text-align: center;
-    color: #fff;
-    background: #ee8a65;
-}
-.mapboxgl-popup { max-width: 800px; font: 14px/16px 'Helvetica Neue', Arial, Helvetica, sans-serif; color: red; }
+    body { margin: 0; padding: 0; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    #menu {
+        background: #ccf2ff;
+        position: absolute;
+        z-index: 1;
+        top: 10px;
+        left: 10px;
+        border-radius: 3px;
+        width: 120px;
+        border: 1px solid rgba(0,0,0,0.4);
+        font-family: 'Open Sans', sans-serif;
+    }
+    #menu a {
+        font-size: 13px;
+        color: #F70D1A;
+        display: block;
+        margin: 0;
+        padding: 10px;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(0,0,0,0.25);
+        text-align: center;
+    }
+    #menu a:last-child { border: none; }
+    #menu a:hover { background-color: #ccf2ff; color: #404040; }
+    #menu a.active { background-color: #3887be; color: #ffffff; }
+    #menu a.active:hover { background: #3074a4; }
+    mapboxgl-popup { max-width: 300px; font: 14px/16px 'Helvetica Neue', Arial, Helvetica, sans-serif; color: red; }
+    #fly {
+        display: block;
+        position: absolute;
+        bottom: 100px;
+        margin: 0px auto;
+        width: 10%;
+        height: 40px;
+        padding: 10px;
+        border: none;
+        border-radius: 3px;
+        font-size: 12px;
+        text-align: center;
+        color: #fff;
+        background: #ee8a65;
+    }
 </style>
 </head>
-
 <body>
+
 <nav id="menu"></nav>
 <div id="map"></div>
 <button id='fly'>Sydney</button>
@@ -65,157 +74,152 @@ body { margin: 0; padding: 0; }
 <script>
 mapboxgl.accessToken = 'pk.eyJ1IjoidGh1bGVtYXBzIiwiYSI6ImNqM3F0Y2JnaDAxYnQzM28xZDVwazhhaDEifQ.pofHlcCOkr9OXfKsMYAAFw';
 
-const map = new mapboxgl.Map({
+var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/thulemaps/clbakxwlt001a15uykj4gmsd3',
     projection: 'globe',
     center: [150.98, -33.898],
-    zoom: 8
+    zoom: 10
 });
 
-// Sample points
-const customData = {
-    'type': 'FeatureCollection',
-    'features': [
-        { 'type': 'Feature', 'properties': { 'title': 'Lincoln Park is special' }, 'geometry': { 'type': 'Point', 'coordinates': [-87.637596, 41.940403] } },
-        { 'type': 'Feature', 'properties': { 'title': 'Burnham Park is special' }, 'geometry': { 'type': 'Point', 'coordinates': [-87.603735, 41.829985] } },
-        { 'type': 'Feature', 'properties': { 'title': 'Millennium Park is special' }, 'geometry': { 'type': 'Point', 'coordinates': [-87.622554, 41.882534] } }
-    ]
+// Mapping display names to exact layer IDs
+var toggleableLayerIds = {
+    "routes per stop": "routes per stop",
+    "satellite": "satellite",
+    "traffic": "traffic",
+    "contours": "contours",
+    "drinking water": "drinking-water",
+    "Pubs": "pubs"   // Changed from Bike Shed
 };
 
-function forwardGeocoder(query) {
-    const matchingFeatures = [];
-    for (const feature of customData.features) {
-        if (feature.properties.title.toLowerCase().includes(query.toLowerCase())) {
-            feature['place_name'] = `🌲 ${feature.properties.title}`;
-            feature['center'] = feature.geometry.coordinates;
-            feature['place_type'] = ['park'];
-            matchingFeatures.push(feature);
-        }
-    }
-    return matchingFeatures;
+// Fetch drinking water points
+async function fetchDrinkingWater() {
+    const bounds = map.getBounds();
+    const query = `
+        [out:json];
+        node["amenity"="drinking_water"](${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()});
+        out body;
+    `;
+    const url = "https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(query);
+    const response = await fetch(url);
+    const data = await response.json();
+    return {
+        type: "FeatureCollection",
+        features: data.elements.map(el => ({
+            type: "Feature",
+            geometry: { type: "Point", coordinates: [el.lon, el.lat] },
+            properties: { id: el.id }
+        }))
+    };
 }
 
-// Map Controls
-map.addControl(new mapboxgl.NavigationControl());
-map.addControl(new mapboxgl.FullscreenControl());
-map.addControl(new MapboxGeocoder({
-    accessToken: mapboxgl.accessToken,
-    localGeocoder: forwardGeocoder,
-    zoom: 14,
-    placeholder: 'Enter search e.g. Lincoln Park',
-    mapboxgl: mapboxgl
-}));
-map.addControl(new mapboxgl.GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: true }));
-
-// DEM Terrain & layer
-map.on('load', () => {
-    map.addSource('mapbox-dem', { 'type': 'raster-dem', 'url': 'mapbox://mapbox.mapbox-terrain-dem-v1', 'tileSize': 512, 'maxzoom': 14 });
-    map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.0 });
-
-    map.addSource('routes-per-stop', { type: 'geojson', data: customData });
-
-    map.addLayer({
-        id: 'routes per stop',
-        type: 'circle',
-        source: 'routes-per-stop',
-        paint: {
-            'circle-radius': 8,
-            'circle-color': '#FF0000',
-            'circle-stroke-width': 2,
-            'circle-stroke-color': '#FFFFFF'
-        }
-    });
-});
-
-// Fly button
-document.getElementById('fly').addEventListener('click', () => {
-    map.flyTo({ center: [151.0652, -33.8468], zoom: 10, speed: 0.8, bearing: 0, pitch: 10 });
-});
-
-// Toggleable Layers
-const toggleableLayerIds = ['routes per stop', 'satellite', 'traffic', 'contours'];
-toggleableLayerIds.forEach(id => {
-    const link = document.createElement('a');
-    link.href = '#';
-    link.className = 'inactive';
-    link.textContent = id;
-    link.onclick = function (e) {
-        e.preventDefault(); e.stopPropagation();
-        const visibility = map.getLayoutProperty(id, 'visibility');
-        if (visibility === 'visible') { map.setLayoutProperty(id, 'visibility', 'none'); this.className = ''; } 
-        else { this.className = 'active'; map.setLayoutProperty(id, 'visibility', 'visible'); }
-    };
-    document.getElementById('menu').appendChild(link);
-});
-
-// Mapillary Setup
-const MAPILLARY_TOKEN = "MLY|25284089057948616|741f6dde55deedb7fefe14f88ebc0a2c";
-
-map.on('click', 'routes per stop', async (e) => {
-    const { lng, lat } = e.lngLat;
-    const feature = e.features[0];
-    const viewerId = `mly-${Date.now()}`;
-
-    // Create popup with placeholder
-    const popup = new mapboxgl.Popup({ maxWidth: '800px' })
-        .setLngLat([lng, lat])
-        .setHTML(`
-            <b>Title:</b> ${feature.properties.title}<br><br>
-            <b>Street view (Mapillary)</b><br>
-            <div id="${viewerId}" style="width:100%; height:300px;">Loading nearest image...</div>
-        `)
-        .addTo(map);
-
-    setTimeout(async () => {
-        try {
-            // 500m search radius
-            const searchRadius = 500; 
-            const deltaLat = searchRadius / 110540;
-            const deltaLng = searchRadius / (111320 * Math.cos(lat * Math.PI / 180));
-            const minLat = lat - deltaLat;
-            const maxLat = lat + deltaLat;
-            const minLng = lng - deltaLng;
-            const maxLng = lng + deltaLng;
-
-            const resp = await fetch(`https://graph.mapillary.com/images?access_token=${MAPILLARY_TOKEN}&fields=id,geometry&bbox=${minLng},${minLat},${maxLng},${maxLat}&limit=50`);
-            const data = await resp.json();
-
-            if (!data.data || data.data.length === 0) {
-                document.getElementById(viewerId).innerHTML = 'No Mapillary images nearby.';
-                return;
+// Fetch pubs
+async function fetchPubs() {
+    const bounds = map.getBounds();
+    const query = `
+        [out:json];
+        node["amenity"="pub"](${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()});
+        out body;
+    `;
+    const url = "https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(query);
+    const response = await fetch(url);
+    const data = await response.json();
+    return {
+        type: "FeatureCollection",
+        features: data.elements.map(el => ({
+            type: "Feature",
+            geometry: { type: "Point", coordinates: [el.lon, el.lat] },
+            properties: { 
+                id: el.id,
+                name: el.tags.name || "Pub",
+                opening_hours: el.tags.opening_hours || "Not available"
             }
+        }))
+    };
+}
 
-            // Compute distances and find closest
-            const nearby = data.data
-                .filter(img => img.geometry && img.geometry.coordinates)
-                .map(img => {
-                    const [imgLng, imgLat] = img.geometry.coordinates;
-                    const dx = (imgLng - lng) * 111320 * Math.cos(lat * Math.PI / 180);
-                    const dy = (imgLat - lat) * 110540;
-                    return { ...img, distance: Math.sqrt(dx*dx + dy*dy) };
-                })
-                .sort((a,b) => a.distance - b.distance);
+map.on('load', function () {
+    // Drinking Water Layer
+    map.addSource('drinking-water', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+    map.addLayer({
+        id: 'drinking-water',
+        type: 'circle',
+        source: 'drinking-water',
+        paint: { 'circle-radius': 6, 'circle-color': '#00BFFF', 'circle-stroke-color': '#fff', 'circle-stroke-width': 1 },
+        layout: { 'visibility': 'none' }
+    });
 
-            const closest = nearby[0];
-            const distance = closest.distance.toFixed(1);
+    // Pubs Layer
+    map.addSource('pubs', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+    map.addLayer({
+        id: 'pubs',
+        type: 'circle',
+        source: 'pubs',
+        paint: { 'circle-radius': 6, 'circle-color': '#FF4500', 'circle-stroke-color': '#fff', 'circle-stroke-width': 1 },
+        layout: { 'visibility': 'none' }
+    });
 
-            document.getElementById(viewerId).innerHTML = `<b>Nearest image:</b> ${distance} m away<br><div id="${viewerId}-viewer" style="width:100%; height:300px;"></div>`;
+    // Popups
+    map.on('click', 'drinking-water', e => {
+        new mapboxgl.Popup()
+            .setLngLat(e.features[0].geometry.coordinates)
+            .setHTML('<b>Drinking Water Location</b>')
+            .addTo(map);
+    });
+    map.on('click', 'pubs', e => {
+        const props = e.features[0].properties;
+        new mapboxgl.Popup()
+            .setLngLat(e.features[0].geometry.coordinates)
+            .setHTML(`<b>${props.name}</b><br>Opening hours: ${props.opening_hours}`)
+            .addTo(map);
+    });
 
-            new mapillary.Viewer({
-                container: `${viewerId}-viewer`,
-                accessToken: MAPILLARY_TOKEN,
-                imageId: closest.id,
-                component: { attribution: false, cover: false, direction: true, zoom: true }
-            });
+    map.on('mouseenter', 'drinking-water', () => { map.getCanvas().style.cursor = 'pointer'; });
+    map.on('mouseleave', 'drinking-water', () => { map.getCanvas().style.cursor = ''; });
+    map.on('mouseenter', 'pubs', () => { map.getCanvas().style.cursor = 'pointer'; });
+    map.on('mouseleave', 'pubs', () => { map.getCanvas().style.cursor = ''; });
 
-        } catch (err) {
-            console.error(err);
-            document.getElementById(viewerId).innerHTML = 'Failed to load Mapillary image.';
-        }
-    }, 200);
+    // Toggle buttons
+    for (var name in toggleableLayerIds) {
+        (function(name) {
+            var layerId = toggleableLayerIds[name];
+            var link = document.createElement('a');
+            link.href = '#';
+            link.className = '';
+            link.textContent = name;
+
+            link.onclick = async function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var visibility = map.getLayoutProperty(layerId, 'visibility');
+
+                if (visibility === 'visible') {
+                    map.setLayoutProperty(layerId, 'visibility', 'none');
+                    this.className = '';
+                } else {
+                    map.setLayoutProperty(layerId, 'visibility', 'visible');
+                    this.className = 'active';
+                    if (name === 'drinking water') {
+                        const geojson = await fetchDrinkingWater();
+                        map.getSource('drinking-water').setData(geojson);
+                    } else if (name === 'Pubs') {
+                        const geojson = await fetchPubs();
+                        map.getSource('pubs').setData(geojson);
+                    }
+                }
+            };
+            document.getElementById('menu').appendChild(link);
+        })(name);
+    }
+
+    // Geolocate control
+    map.addControl(new mapboxgl.GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: true }));
+
+    // Fly button
+    document.getElementById('fly').addEventListener('click', function () {
+        map.flyTo({ center: [151.0652, -33.8468], zoom: 10, speed: 0.8, bearing: 0, pitch: 10 });
+    });
 });
 </script>
 </body>
 </html>
-
