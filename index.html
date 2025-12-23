@@ -21,7 +21,7 @@ body { margin: 0; padding: 0; }
     top: 10px;
     left: 10px;
     border-radius: 3px;
-    width: 140px;
+    width: 160px;
     border: 1px solid rgba(0,0,0,0.4);
     font-family: 'Open Sans', sans-serif;
 }
@@ -74,6 +74,17 @@ var map = new mapboxgl.Map({
     projection: 'globe'
 });
 
+/* ---------- WHERE AM I ---------- */
+map.addControl(
+    new mapboxgl.GeolocateControl({
+        positionOptions: { enableHighAccuracy: true },
+        trackUserLocation: true,
+        showUserHeading: true
+    }),
+    'top-right'
+);
+
+/* ---------- TOGGLE MENU ---------- */
 var toggleableLayerIds = {
     "routes per stop": ["routes per stop"],
     "satellite": ["satellite"],
@@ -82,7 +93,9 @@ var toggleableLayerIds = {
     "drinking water": ["drinking-water", "drinking-water-labels"],
     "Pubs": ["pubs", "pubs-labels"],
     "Bakeries": ["bakeries", "bakeries-labels"],
-    "Cafes": ["cafes", "cafes-labels"]
+    "Cafes": ["cafes", "cafes-labels"],
+    "Soccer fields": ["soccer-fields", "soccer-fields-labels"],
+    "Playgrounds": ["playgrounds", "playgrounds-labels"]
 };
 
 // ---------- DATA FETCHERS ----------
@@ -109,7 +122,10 @@ async function fetchPubs() {
     const b = map.getBounds();
     const q = `
     [out:json];
-    node["amenity"="pub"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
+    (
+      node["amenity"="pub"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
+      node["amenity"="bar"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
+    );
     out body;`;
     const r = await fetch("https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(q));
     const d = await r.json();
@@ -118,7 +134,7 @@ async function fetchPubs() {
         features: d.elements.map(e => ({
             type: "Feature",
             geometry: { type: "Point", coordinates: [e.lon, e.lat] },
-            properties: { name: e.tags?.name || "Pub" }
+            properties: { name: e.tags?.name || "Pub / Bar" }
         }))
     };
 }
@@ -127,10 +143,7 @@ async function fetchBakeries() {
     const b = map.getBounds();
     const q = `
     [out:json];
-    (
-      node["shop"="bakery"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
-      node["amenity"="bakery"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
-    );
+    node["shop"="bakery"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
     out body;`;
     const r = await fetch("https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(q));
     const d = await r.json();
@@ -162,6 +175,59 @@ async function fetchCafes() {
     };
 }
 
+/* ---------- FIXED: SOCCER FIELDS ---------- */
+async function fetchSoccerFields() {
+    const b = map.getBounds();
+    const q = `
+    [out:json];
+    (
+      node["leisure"="pitch"]["sport"="soccer"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
+      way["leisure"="pitch"]["sport"="soccer"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
+      relation["leisure"="pitch"]["sport"="soccer"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
+    );
+    out center;`;
+
+    const r = await fetch("https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(q));
+    const d = await r.json();
+
+    return {
+        type: "FeatureCollection",
+        features: d.elements
+            .filter(e => e.center || e.lat)
+            .map(e => ({
+                type: "Feature",
+                geometry: {
+                    type: "Point",
+                    coordinates: e.center
+                        ? [e.center.lon, e.center.lat]
+                        : [e.lon, e.lat]
+                },
+                properties: { name: e.tags?.name || "Soccer field" }
+            }))
+    };
+}
+
+/* ---------- FIXED: PLAYGROUNDS ---------- */
+async function fetchPlaygrounds() {
+    const b = map.getBounds();
+    const q = `
+    [out:json];
+    node["leisure"="playground"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
+    out body;`;
+
+    const r = await fetch("https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(q));
+    const d = await r.json();
+
+    return {
+        type: "FeatureCollection",
+        features: d.elements.map(e => ({
+            type: "Feature",
+            geometry: { type: "Point", coordinates: [e.lon, e.lat] },
+            properties: { name: e.tags?.name || "Playground" }
+        }))
+    };
+}
+
 // ---------- MAP LOAD ----------
 
 map.on('load', () => {
@@ -170,7 +236,7 @@ map.on('load', () => {
         map.addSource(id, { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
 
         map.addLayer({
-            id: id,
+            id,
             type: 'circle',
             source: id,
             paint: {
@@ -200,8 +266,9 @@ map.on('load', () => {
     addPointWithLabels('pubs', '#FF4500', '#8B0000');
     addPointWithLabels('bakeries', '#8B4513', '#5A2D0C');
     addPointWithLabels('cafes', '#6F4E37', '#4B2E1A');
+    addPointWithLabels('soccer-fields', '#32CD32', '#006400');
+    addPointWithLabels('playgrounds', '#FFD700', '#8B7500');
 
-    // TOGGLES
     for (const name in toggleableLayerIds) {
         const layers = toggleableLayerIds[name];
         const link = document.createElement('a');
@@ -210,7 +277,6 @@ map.on('load', () => {
 
         link.onclick = async e => {
             e.preventDefault();
-
             const visible = map.getLayoutProperty(layers[0], 'visibility') === 'visible';
 
             layers.forEach(id =>
@@ -220,14 +286,12 @@ map.on('load', () => {
             link.className = visible ? '' : 'active';
 
             if (!visible) {
-                if (name === 'drinking water')
-                    map.getSource('drinking-water').setData(await fetchDrinkingWater());
-                if (name === 'Pubs')
-                    map.getSource('pubs').setData(await fetchPubs());
-                if (name === 'Bakeries')
-                    map.getSource('bakeries').setData(await fetchBakeries());
-                if (name === 'Cafes')
-                    map.getSource('cafes').setData(await fetchCafes());
+                if (name === 'drinking water') map.getSource('drinking-water').setData(await fetchDrinkingWater());
+                if (name === 'Pubs') map.getSource('pubs').setData(await fetchPubs());
+                if (name === 'Bakeries') map.getSource('bakeries').setData(await fetchBakeries());
+                if (name === 'Cafes') map.getSource('cafes').setData(await fetchCafes());
+                if (name === 'Soccer fields') map.getSource('soccer-fields').setData(await fetchSoccerFields());
+                if (name === 'Playgrounds') map.getSource('playgrounds').setData(await fetchPlaygrounds());
             }
         };
 
