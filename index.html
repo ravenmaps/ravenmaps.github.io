@@ -64,17 +64,17 @@ body { margin: 0; padding: 0; }
 <button id="fly">Sydney</button>
 
 <script>
-mapboxgl.accessToken = 'pk.eyJ1IjoidGh1bGVtYXBzIiwiYSI6ImNqM3F0Y2JnaDAxYnQzM28xZDVwazhhaDEifQ.pofHlcCOkr9OXfKsMYAAFw';
+mapboxgl.accessToken =
+'pk.eyJ1IjoidGh1bGVtYXBzIiwiYSI6ImNqM3F0Y2JnaDAxYnQzM28xZDVwazhhaDEifQ.pofHlcCOkr9OXfKsMYAAFw';
 
 var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/thulemaps/clbakxwlt001a15uykj4gmsd3',
     center: [150.98, -33.898],
-    zoom: 10,
-    projection: 'globe'
+    zoom: 10
 });
 
-/* ---------- WHERE AM I ---------- */
+/* ---------- CONTROLS ---------- */
 map.addControl(
     new mapboxgl.GeolocateControl({
         positionOptions: { enableHighAccuracy: true },
@@ -84,13 +84,9 @@ map.addControl(
     'top-right'
 );
 
-/* ---------- TOGGLE MENU ---------- */
+/* ---------- MENU CONFIG ---------- */
 var toggleableLayerIds = {
-    "routes per stop": ["routes per stop"],
-    "satellite": ["satellite"],
-    "traffic": ["traffic"],
-    "contours": ["contours"],
-    "drinking water": ["drinking-water", "drinking-water-labels"],
+    "Drinking water": ["drinking-water", "drinking-water-labels"],
     "Pubs": ["pubs", "pubs-labels"],
     "Bakeries": ["bakeries", "bakeries-labels"],
     "Cafes": ["cafes", "cafes-labels"],
@@ -98,84 +94,34 @@ var toggleableLayerIds = {
     "Playgrounds": ["playgrounds", "playgrounds-labels"]
 };
 
-// ---------- DATA FETCHERS ----------
-
-async function fetchDrinkingWater() {
-    const b = map.getBounds();
-    const q = `
-    [out:json];
-    node["amenity"="drinking_water"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
-    out body;`;
-    const r = await fetch("https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(q));
-    const d = await r.json();
-    return {
-        type: "FeatureCollection",
-        features: d.elements.map(e => ({
-            type: "Feature",
-            geometry: { type: "Point", coordinates: [e.lon, e.lat] },
-            properties: { name: "Drinking water" }
-        }))
-    };
-}
-
-async function fetchPubs() {
-    const b = map.getBounds();
-    const q = `
-    [out:json];
-    (
-      node["amenity"="pub"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
-      node["amenity"="bar"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
+/* ---------- DATA FETCHERS ---------- */
+async function fetchOSM(query) {
+    const r = await fetch(
+        "https://overpass-api.de/api/interpreter?data=" +
+        encodeURIComponent(query)
     );
-    out body;`;
-    const r = await fetch("https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(q));
     const d = await r.json();
-    return {
-        type: "FeatureCollection",
-        features: d.elements.map(e => ({
-            type: "Feature",
-            geometry: { type: "Point", coordinates: [e.lon, e.lat] },
-            properties: { name: e.tags?.name || "Pub / Bar" }
-        }))
-    };
+    return d.elements;
 }
 
-async function fetchBakeries() {
+async function fetchPoints(filter, defaultName) {
     const b = map.getBounds();
     const q = `
     [out:json];
-    node["shop"="bakery"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
+    node${filter}(${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
     out body;`;
-    const r = await fetch("https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(q));
-    const d = await r.json();
+
+    const elements = await fetchOSM(q);
     return {
         type: "FeatureCollection",
-        features: d.elements.map(e => ({
+        features: elements.map(e => ({
             type: "Feature",
             geometry: { type: "Point", coordinates: [e.lon, e.lat] },
-            properties: { name: e.tags?.name || "Bakery" }
+            properties: { name: e.tags?.name || defaultName }
         }))
     };
 }
 
-async function fetchCafes() {
-    const b = map.getBounds();
-    const q = `
-    [out:json];
-    node["amenity"="cafe"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
-    out body;`;
-    const r = await fetch("https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(q));
-    const d = await r.json();
-    return {
-        type: "FeatureCollection",
-        features: d.elements.map(e => ({
-            type: "Feature",
-            geometry: { type: "Point", coordinates: [e.lon, e.lat] },
-            properties: { name: e.tags?.name || "Cafe" }
-        }))
-    };
-}
-
-/* ---------- FIXED: SOCCER FIELDS ---------- */
 async function fetchSoccerFields() {
     const b = map.getBounds();
     const q = `
@@ -187,12 +133,10 @@ async function fetchSoccerFields() {
     );
     out center;`;
 
-    const r = await fetch("https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(q));
-    const d = await r.json();
-
+    const elements = await fetchOSM(q);
     return {
         type: "FeatureCollection",
-        features: d.elements
+        features: elements
             .filter(e => e.center || e.lat)
             .map(e => ({
                 type: "Feature",
@@ -207,33 +151,14 @@ async function fetchSoccerFields() {
     };
 }
 
-/* ---------- FIXED: PLAYGROUNDS ---------- */
-async function fetchPlaygrounds() {
-    const b = map.getBounds();
-    const q = `
-    [out:json];
-    node["leisure"="playground"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
-    out body;`;
-
-    const r = await fetch("https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(q));
-    const d = await r.json();
-
-    return {
-        type: "FeatureCollection",
-        features: d.elements.map(e => ({
-            type: "Feature",
-            geometry: { type: "Point", coordinates: [e.lon, e.lat] },
-            properties: { name: e.tags?.name || "Playground" }
-        }))
-    };
-}
-
-// ---------- MAP LOAD ----------
-
+/* ---------- MAP LOAD ---------- */
 map.on('load', () => {
 
     function addPointWithLabels(id, color, textColor) {
-        map.addSource(id, { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+        map.addSource(id, {
+            type: 'geojson',
+            data: { type: 'FeatureCollection', features: [] }
+        });
 
         map.addLayer({
             id,
@@ -277,21 +202,51 @@ map.on('load', () => {
 
         link.onclick = async e => {
             e.preventDefault();
-            const visible = map.getLayoutProperty(layers[0], 'visibility') === 'visible';
 
-            layers.forEach(id =>
-                map.setLayoutProperty(id, 'visibility', visible ? 'none' : 'visible')
-            );
+            const firstLayer = layers[0];
+            if (!map.getLayer(firstLayer)) return;
+
+            const visible =
+                map.getLayoutProperty(firstLayer, 'visibility') === 'visible';
+
+            layers.forEach(id => {
+                if (map.getLayer(id)) {
+                    map.setLayoutProperty(id, 'visibility', visible ? 'none' : 'visible');
+                }
+            });
 
             link.className = visible ? '' : 'active';
 
             if (!visible) {
-                if (name === 'drinking water') map.getSource('drinking-water').setData(await fetchDrinkingWater());
-                if (name === 'Pubs') map.getSource('pubs').setData(await fetchPubs());
-                if (name === 'Bakeries') map.getSource('bakeries').setData(await fetchBakeries());
-                if (name === 'Cafes') map.getSource('cafes').setData(await fetchCafes());
-                if (name === 'Soccer fields') map.getSource('soccer-fields').setData(await fetchSoccerFields());
-                if (name === 'Playgrounds') map.getSource('playgrounds').setData(await fetchPlaygrounds());
+                if (name === 'Drinking water')
+                    map.getSource('drinking-water').setData(
+                        await fetchPoints('["amenity"="drinking_water"]', 'Drinking water')
+                    );
+
+                if (name === 'Pubs')
+                    map.getSource('pubs').setData(
+                        await fetchPoints('["amenity"~"pub|bar"]', 'Pub / Bar')
+                    );
+
+                if (name === 'Bakeries')
+                    map.getSource('bakeries').setData(
+                        await fetchPoints('["shop"="bakery"]', 'Bakery')
+                    );
+
+                if (name === 'Cafes')
+                    map.getSource('cafes').setData(
+                        await fetchPoints('["amenity"="cafe"]', 'Cafe')
+                    );
+
+                if (name === 'Soccer fields')
+                    map.getSource('soccer-fields').setData(
+                        await fetchSoccerFields()
+                    );
+
+                if (name === 'Playgrounds')
+                    map.getSource('playgrounds').setData(
+                        await fetchPoints('["leisure"="playground"]', 'Playground')
+                    );
             }
         };
 
