@@ -1,262 +1,30 @@
 <!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8" />
-<title>routes per stop</title>
-<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ScrollyVideo HTML Demo</title>
 
-<script src="https://api.mapbox.com/mapbox-gl-js/v2.4.0/mapbox-gl.js"></script>
-<link href="https://api.mapbox.com/mapbox-gl-js/v2.4.0/mapbox-gl.css" rel="stylesheet">
-
-<script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
-
-<style>
-body { margin: 0; padding: 0; }
-#map { position: absolute; top: 0; bottom: 0; width: 100%; }
-
-#menu {
-    background: #ccf2ff;
-    position: absolute;
-    z-index: 1;
-    top: 10px;
-    left: 10px;
-    border-radius: 3px;
-    width: 160px;
-    border: 1px solid rgba(0,0,0,0.4);
-    font-family: 'Open Sans', sans-serif;
-}
-
-#menu a {
-    font-size: 13px;
-    color: #F70D1A;
-    display: block;
-    padding: 10px;
-    text-decoration: none;
-    border-bottom: 1px solid rgba(0,0,0,0.25);
-    text-align: center;
-}
-
-#menu a.active {
-    background-color: #3887be;
-    color: #fff;
-}
-
-#menu a:last-child { border-bottom: none; }
-
-#fly {
-    position: absolute;
-    bottom: 100px;
-    left: 10px;
-    width: 120px;
-    height: 40px;
-    border: none;
-    border-radius: 3px;
-    color: #fff;
-    background: #ee8a65;
-}
-</style>
-</head>
+    <style>
+      body, html, * {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
 
 <body>
+  <div style="height: 300vh;">
+    <div id="scrolly-video"></div>
+  </div>
 
-<nav id="menu"></nav>
-<div id="map"></div>
-<button id="fly">Sydney</button>
-
-<script>
-mapboxgl.accessToken =
-'pk.eyJ1IjoidGh1bGVtYXBzIiwiYSI6ImNqM3F0Y2JnaDAxYnQzM28xZDVwazhhaDEifQ.pofHlcCOkr9OXfKsMYAAFw';
-
-var map = new mapboxgl.Map({
-    container: 'map',
-    style: 'mapbox://styles/thulemaps/clbakxwlt001a15uykj4gmsd3',
-    center: [150.98, -33.898],
-    zoom: 10
-});
-
-/* ---------- CONTROLS ---------- */
-map.addControl(
-    new mapboxgl.GeolocateControl({
-        positionOptions: { enableHighAccuracy: true },
-        trackUserLocation: true,
-        showUserHeading: true
-    }),
-    'top-right'
-);
-
-/* ---------- MENU CONFIG ---------- */
-var toggleableLayerIds = {
-    "Drinking water": ["drinking-water", "drinking-water-labels"],
-    "Pubs": ["pubs", "pubs-labels"],
-    "Bakeries": ["bakeries", "bakeries-labels"],
-    "Cafes": ["cafes", "cafes-labels"],
-    "Soccer fields": ["soccer-fields", "soccer-fields-labels"],
-    "Playgrounds": ["playgrounds", "playgrounds-labels"]
-};
-
-/* ---------- DATA FETCHERS ---------- */
-async function fetchOSM(query) {
-    const r = await fetch(
-        "https://overpass-api.de/api/interpreter?data=" +
-        encodeURIComponent(query)
-    );
-    const d = await r.json();
-    return d.elements;
-}
-
-async function fetchPoints(filter, defaultName) {
-    const b = map.getBounds();
-    const q = `
-    [out:json];
-    node${filter}(${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
-    out body;`;
-
-    const elements = await fetchOSM(q);
-    return {
-        type: "FeatureCollection",
-        features: elements.map(e => ({
-            type: "Feature",
-            geometry: { type: "Point", coordinates: [e.lon, e.lat] },
-            properties: { name: e.tags?.name || defaultName }
-        }))
-    };
-}
-
-async function fetchSoccerFields() {
-    const b = map.getBounds();
-    const q = `
-    [out:json];
-    (
-      node["leisure"="pitch"]["sport"="soccer"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
-      way["leisure"="pitch"]["sport"="soccer"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
-      relation["leisure"="pitch"]["sport"="soccer"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
-    );
-    out center;`;
-
-    const elements = await fetchOSM(q);
-    return {
-        type: "FeatureCollection",
-        features: elements
-            .filter(e => e.center || e.lat)
-            .map(e => ({
-                type: "Feature",
-                geometry: {
-                    type: "Point",
-                    coordinates: e.center
-                        ? [e.center.lon, e.center.lat]
-                        : [e.lon, e.lat]
-                },
-                properties: { name: e.tags?.name || "Soccer field" }
-            }))
-    };
-}
-
-/* ---------- MAP LOAD ---------- */
-map.on('load', () => {
-
-    function addPointWithLabels(id, color, textColor) {
-        map.addSource(id, {
-            type: 'geojson',
-            data: { type: 'FeatureCollection', features: [] }
-        });
-
-        map.addLayer({
-            id,
-            type: 'circle',
-            source: id,
-            paint: {
-                'circle-radius': 6,
-                'circle-color': color,
-                'circle-stroke-color': '#fff',
-                'circle-stroke-width': 1
-            },
-            layout: { visibility: 'none' }
-        });
-
-        map.addLayer({
-            id: id + '-labels',
-            type: 'symbol',
-            source: id,
-            layout: {
-                'text-field': ['get', 'name'],
-                'text-size': 12,
-                'text-offset': [0, 1.2],
-                'visibility': 'none'
-            },
-            paint: { 'text-color': textColor }
-        });
-    }
-
-    addPointWithLabels('drinking-water', '#00BFFF', '#00688B');
-    addPointWithLabels('pubs', '#FF4500', '#8B0000');
-    addPointWithLabels('bakeries', '#8B4513', '#5A2D0C');
-    addPointWithLabels('cafes', '#6F4E37', '#4B2E1A');
-    addPointWithLabels('soccer-fields', '#32CD32', '#006400');
-    addPointWithLabels('playgrounds', '#FFD700', '#8B7500');
-
-    for (const name in toggleableLayerIds) {
-        const layers = toggleableLayerIds[name];
-        const link = document.createElement('a');
-        link.textContent = name;
-        link.href = '#';
-
-        link.onclick = async e => {
-            e.preventDefault();
-
-            const firstLayer = layers[0];
-            if (!map.getLayer(firstLayer)) return;
-
-            const visible =
-                map.getLayoutProperty(firstLayer, 'visibility') === 'visible';
-
-            layers.forEach(id => {
-                if (map.getLayer(id)) {
-                    map.setLayoutProperty(id, 'visibility', visible ? 'none' : 'visible');
-                }
-            });
-
-            link.className = visible ? '' : 'active';
-
-            if (!visible) {
-                if (name === 'Drinking water')
-                    map.getSource('drinking-water').setData(
-                        await fetchPoints('["amenity"="drinking_water"]', 'Drinking water')
-                    );
-
-                if (name === 'Pubs')
-                    map.getSource('pubs').setData(
-                        await fetchPoints('["amenity"~"pub|bar"]', 'Pub / Bar')
-                    );
-
-                if (name === 'Bakeries')
-                    map.getSource('bakeries').setData(
-                        await fetchPoints('["shop"="bakery"]', 'Bakery')
-                    );
-
-                if (name === 'Cafes')
-                    map.getSource('cafes').setData(
-                        await fetchPoints('["amenity"="cafe"]', 'Cafe')
-                    );
-
-                if (name === 'Soccer fields')
-                    map.getSource('soccer-fields').setData(
-                        await fetchSoccerFields()
-                    );
-
-                if (name === 'Playgrounds')
-                    map.getSource('playgrounds').setData(
-                        await fetchPoints('["leisure"="playground"]', 'Playground')
-                    );
-            }
-        };
-
-        document.getElementById('menu').appendChild(link);
-    }
-
-    document.getElementById('fly').onclick = () => {
-        map.flyTo({ center: [151.0652, -33.8468], zoom: 10 });
-    };
-});
-</script>
+  <script src="https://cdn.jsdelivr.net/npm/scrolly-video@latest/dist/scrolly-video.js"></script>
+  <script type="text/javascript">
+    new ScrollyVideo({
+      scrollyVideoContainer: "scrolly-video",
+      src: "http://ravenmaps.github.io/Crossbar.mp4"
+    });
+  </script>
 </body>
+
 </html>
