@@ -1,30 +1,66 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>ScrollyVideo HTML Demo</title>
-
-    <style>
-      body, html, * {
-        margin: 0;
-        padding: 0;
-      }
-    </style>
-  </head>
-
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Basic MapLibreGL Map</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+<script src='https://unpkg.com/maplibre-gl@2.1.1/dist/maplibre-gl.js'></script>
+<link href='https://unpkg.com/maplibre-gl@2.1.1/dist/maplibre-gl.css' rel='stylesheet' />
+  
+<style>
+#map { position: absolute; top: 0; bottom: 0; width: 100%; }
+#marker {
+background-image: url('https://sites-formations.univ-rennes2.fr/mastersigat/images/75709127.png');
+background-size: cover;
+width: 50px;
+height: 50px;
+border-radius: 50%;
+cursor: pointer;}
+.Mypopup .mapboxgl-popup-content {
+      background-color: black;
+      color : white;
+      opacity : 0.7;
+}
+</style>
+</head>
 <body>
-  <div style="height: 300vh;">
-    <div id="scrolly-video"></div>
-  </div>
+<div id="map"></div>
+<script>
+// Map configuration 
+var map = new maplibregl.Map({
+container: 'map',
+style: 'https://geoserveis.icgc.cat/contextmaps/osm-bright.json', //Basemap style
+zoom: 17, // Zoom
+center: [-1.696585806176717, 48.10838773178866], // Center
+pitch : 60, // Inclinaison
+bearing : 50 // Rotation
+});
+ 
+// create the popup
+var popup = new maplibregl.Popup({ className: "Mypopup",
+  closeButton: false,
+  closeOnClick: true, offset: 25 }).setText('The great place of Rennes');
+ 
+// create DOM element for the marker
+var el = document.createElement('div');
+el.id = 'marker';
+// create the marker
+new maplibregl.Marker(el)
+.setLngLat([-1.696585806176717, 48.10838773178866])
+.setPopup(popup) // sets a popup on this marker
+.addTo(map);
+    // Add navigation control and scale
+  
+var nav = new maplibregl.NavigationControl();
+map.addControl(nav, 'top-left');
+var scale = new maplibregl.ScaleControl({
+maxWidth: 80,
+unit: 'metric'
 
-  <script src="https://cdn.jsdelivr.net/npm/scrolly-video@latest/dist/scrolly-video.js"></script>
-  <script type="text/javascript">
-    new ScrollyVideo({
-      scrollyVideoContainer: "scrolly-video",
-      src: "http://ravenmaps.github.io/Crossbar.mp4"
-    });
-  </script>
+});
+map.addControl(scale);
+  
+</script>
+ 
 </body>
-
-</html>
+</html
