@@ -1,108 +1,342 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset='utf-8' />
-<title>MapLibreGL / Clusters Map</title>
-<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-	
-<script src='https://unpkg.com/maplibre-gl@2.1.1/dist/maplibre-gl.js'></script>
-<link href='https://unpkg.com/maplibre-gl@2.1.1/dist/maplibre-gl.css' rel='stylesheet' />
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>World Cup 2026 Schedule</title>
 
 <style>
-body { margin:0; padding:0; }
-#map { position:absolute; top:0; bottom:0; width:100%; }
+body {
+    font-family: Arial, sans-serif;
+    background:#f5f7fb;
+    margin:0;
+    padding:20px;
+}
+
+h1 { text-align:center; }
+
+.controls {
+    text-align:center;
+    margin-bottom:20px;
+}
+
+input, select {
+    padding:10px;
+    font-size:14px;
+    margin:5px;
+    border-radius:8px;
+    border:1px solid #ccc;
+}
+
+.grid {
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap:15px;
+}
+
+.card {
+    background:white;
+    border-radius:12px;
+    padding:15px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.08);
+}
+
+.top {
+    display:flex;
+    justify-content:space-between;
+    font-size:12px;
+    color:#666;
+}
+
+.badge {
+    background:#0b5ed7;
+    color:white;
+    padding:3px 8px;
+    border-radius:20px;
+    font-size:11px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+
+.group-badge {
+    background:#28a745;
+    color:white;
+    padding:2px 6px;
+    border-radius:10px;
+    font-size:10px;
+}
+
+.match {
+    font-size:16px;
+    font-weight:bold;
+    margin:10px 0;
+}
+
+.team {
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+}
+
+.team img {
+    width:22px;
+    height:16px;
+    border-radius:3px;
+}
+
+.meta {
+    font-size:12px;
+    color:#555;
+    margin-top:8px;
+}
 </style>
 </head>
+
 <body>
- 
- 
-<div id='map'></div>
- 
+
+<h1>🏆 FIFA World Cup 2026 Schedule</h1>
+
+<div class="controls">
+    <input id="search" placeholder="Search team or venue..." />
+    <select id="filter">
+        <option value="">All Stages</option>
+        <option>Group Stage</option>
+        <option>Round of 32</option>
+        <option>Round of 16</option>
+        <option>Quarter-Finals</option>
+        <option>Semi-Finals</option>
+        <option>World Cup Final</option>
+    </select>
+</div>
+
+<div class="grid" id="grid"></div>
+
 <script>
 
-var map = new maplibregl.Map({
-container: 'map',
-style: 'https://api.maptiler.com/tiles/outdoor/tiles.json?key=TqcFDP5nY9E0HPq9krd1', 
-  zoom: 11.7, // Zoom
-  center: [2.335, 48.858],  // Centrage carte
-  bearing: 0,  // Rotation carte
-  minZoom:11.7
-});
- 
-map.on('load', function() {
+/* =======================
+   FLAGS
+======================= */
+const teams = {
+"Mexico":"mx","South Africa":"za","South Korea":"kr","Czechia":"cz","Canada":"ca",
+"Bosnia and Herzegovina":"ba","USA":"us","Paraguay":"py","Qatar":"qa","Switzerland":"ch",
+"Brazil":"br","Morocco":"ma","Haiti":"ht","Scotland":"gb-sct","Australia":"au","Turkiye":"tr",
+"Germany":"de","Curacao":"cw","Netherlands":"nl","Japan":"jp","Sweden":"se","Tunisia":"tn",
+"Spain":"es","Cabo Verde":"cv","Belgium":"be","Egypt":"eg","Iran":"ir","New Zealand":"nz",
+"France":"fr","Senegal":"sn","Iraq":"iq","Norway":"no","Argentina":"ar","Algeria":"dz",
+"Austria":"at","Jordan":"jo","Portugal":"pt","DR Congo":"cd","England":"gb-eng","Ghana":"gh",
+"Uzbekistan":"uz","Colombia":"co","Saudi Arabia":"sa","Uruguay":"uy","Panama":"pa",
+"Ecuador":"ec","Cote d’Ivoire":"ci","Croatia":"hr"
+};
 
-  // Add arrondissements
+/* =======================
+   GROUP DETECTION
+======================= */
+function getGroup(text){
+    const m = text.match(/Group ([A-L])/i);
+    return m ? m[1] : null;
+}
 
-       map.addSource('lignes', {
-            type: 'geojson',
-            data: 'https://raw.githubusercontent.com/mastersigat/data/main/arrondissements.geojson' 
-        });
+/* =======================
+   FULL 104 MATCHES
+======================= */
+const matches = [
+["1","Group Stage","Mexico","South Africa","Friday, 12 June 2026","5am","Estadio Azteca","Mexico City"],
+["2","Group Stage","South Korea","Czechia","Friday, 12 June 2026","12pm","Estadio Akron","Guadalajara"],
+["3","Group Stage","Canada","Bosnia and Herzegovina","Saturday, 13 June 2026","5am","BMO Field","Toronto"],
+["4","Group Stage","USA","Paraguay","Saturday, 13 June 2026","11am","SoFi Stadium","Los Angeles"],
 
-     map.addLayer({
-            'id': 'Lignes',
-            'type': 'line',
-            'source': 'lignes',
-            'paint': {'line-width': 1,
-                     'line-color': '#AAAAAA'}
-     });   
-  
-  // Add data bike stations
-  
-  
-map.addSource('DMR', {
-            type: 'geojson',
-            data: 'https://raw.githubusercontent.com/mastersigat/data/main/DMR.geojson',
-			cluster: true,
-			clusterMaxZoom: 15,
-			clusterRadius: 40
-        });
+["5","Group Stage","Qatar","Switzerland","Sunday, 14 June 2026","5am","Levi’s Stadium","Santa Clara"],
+["6","Group Stage","Brazil","Morocco","Sunday, 14 June 2026","8am","MetLife Stadium","New York"],
+["7","Group Stage","Haiti","Scotland","Sunday, 14 June 2026","11am","Gillette Stadium","Boston"],
+["8","Group Stage","Australia","Turkiye","Sunday, 14 June 2026","2pm","BC Place","Vancouver"],
 
-    // Configuration cluster Size and color
+["9","Group Stage","Germany","Curacao","Monday, 15 June 2026","3am","NRG Stadium","Houston"],
+["10","Group Stage","Netherlands","Japan","Monday, 15 June 2026","6am","AT&T Stadium","Dallas"],
+["11","Group Stage","Cote d’Ivoire","Ecuador","Monday, 15 June 2026","9am","Lincoln Financial Field","Philadelphia"],
+["12","Group Stage","Sweden","Tunisia","Monday, 15 June 2026","12pm","Estadio BBVA","Monterrey"],
 
-map.addLayer({
-            'id': 'Clusters',
-            'type': 'circle',
-            'source': 'DMR',
-            filter: ['has', 'point_count'],
-            paint: {'circle-color': ['step',['get', 'point_count'],
-						'#51bbd6',1000,
-						'#f1f075',2500,
-						'#f28cb1', 5000,
-						'#FF4136'],
-					'circle-stroke-color': '#ffffff',	
-					'circle-radius': ['step',['get', 'point_count'],
-									5,200,10,500,15,1000,20,3000,35,5000,45,8000,60]}
-}); 
+["13","Group Stage","Spain","Cabo Verde","Tuesday, 16 June 2026","2am","Mercedes-Benz Stadium","Atlanta"],
+["14","Group Stage","Belgium","Egypt","Tuesday, 16 June 2026","5am","Lumen Field","Seattle"],
+["15","Group Stage","Saudi Arabia","Uruguay","Tuesday, 16 June 2026","8am","Hard Rock Stadium","Miami"],
+["16","Group Stage","Iran","New Zealand","Tuesday, 16 June 2026","11am","SoFi Stadium","Los Angeles"],
 
-  
-  // Configuration cluster label
-  
-map.addLayer({ id: 'cluster-count',
-               type: 'symbol',
-               source: 'DMR',
-filter: ['has', 'point_count'],
-layout: {
-'text-field': '{point_count_abbreviated}',
-'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-'text-size': 13}
-});  
+["17","Group Stage","France","Senegal","Wednesday, 17 June 2026","5am","MetLife Stadium","New York"],
+["18","Group Stage","Iraq","Norway","Wednesday, 17 June 2026","8am","Gillette Stadium","Boston"],
+["19","Group Stage","Argentina","Algeria","Wednesday, 17 June 2026","11am","Arrowhead Stadium","Kansas City"],
+["20","Group Stage","Austria","Jordan","Wednesday, 17 June 2026","2pm","Levi’s Stadium","Santa Clara"],
 
+["21","Group Stage","Portugal","DR Congo","Thursday, 18 June 2026","3am","NRG Stadium","Houston"],
+["22","Group Stage","England","Croatia","Thursday, 18 June 2026","6am","AT&T Stadium","Dallas"],
+["23","Group Stage","Ghana","Panama","Thursday, 18 June 2026","9am","BMO Field","Toronto"],
+["24","Group Stage","Uzbekistan","Colombia","Thursday, 18 June 2026","12pm","Estadio Azteca","Mexico City"],
+
+["25","Group Stage","Czechia","South Africa","Friday, 19 June 2026","2am","Mercedes-Benz Stadium","Atlanta"],
+["26","Group Stage","Switzerland","Bosnia and Herzegovina","Friday, 19 June 2026","5am","SoFi Stadium","Los Angeles"],
+["27","Group Stage","Canada","Qatar","Friday, 19 June 2026","8am","BC Place","Vancouver"],
+["28","Group Stage","Mexico","South Korea","Friday, 19 June 2026","11am","Estadio Akron","Guadalajara"],
+
+["29","Group Stage","USA","Australia","Saturday, 20 June 2026","5am","Lumen Field","Seattle"],
+["30","Group Stage","Scotland","Morocco","Saturday, 20 June 2026","8am","Gillette Stadium","Boston"],
+["31","Group Stage","Brazil","Haiti","Saturday, 20 June 2026","11am","Lincoln Financial Field","Philadelphia"],
+["32","Group Stage","Turkiye","Paraguay","Saturday, 20 June 2026","2pm","Levi’s Stadium","Santa Clara"],
+
+["33","Group Stage","Netherlands","Sweden","Sunday, 21 June 2026","3am","NRG Stadium","Houston"],
+["34","Group Stage","Germany","Cote d’Ivoire","Sunday, 21 June 2026","6am","BMO Field","Toronto"],
+["35","Group Stage","Ecuador","Curacao","Sunday, 21 June 2026","9am","Arrowhead Stadium","Kansas City"],
+["36","Group Stage","Tunisia","Japan","Sunday, 21 June 2026","12pm","Estadio BBVA","Monterrey"],
+
+["37","Group Stage","Spain","Saudi Arabia","Monday, 22 June 2026","2am","Mercedes-Benz Stadium","Atlanta"],
+["38","Group Stage","Belgium","Iran","Monday, 22 June 2026","5am","SoFi Stadium","Los Angeles"],
+["39","Group Stage","Uruguay","Cabo Verde","Monday, 22 June 2026","8am","Hard Rock Stadium","Miami"],
+["40","Group Stage","New Zealand","Egypt","Monday, 22 June 2026","11am","BC Place","Vancouver"],
+
+["41","Group Stage","Argentina","Austria","Tuesday, 23 June 2026","3am","AT&T Stadium","Dallas"],
+["42","Group Stage","France","Iraq","Tuesday, 23 June 2026","7am","Lincoln Financial Field","Philadelphia"],
+["43","Group Stage","Norway","Senegal","Tuesday, 23 June 2026","10am","MetLife Stadium","New York"],
+["44","Group Stage","Jordan","Algeria","Tuesday, 23 June 2026","1pm","Levi’s Stadium","Santa Clara"],
+
+["45","Group Stage","Portugal","Uzbekistan","Wednesday, 24 June 2026","3am","NRG Stadium","Houston"],
+["46","Group Stage","England","Ghana","Wednesday, 24 June 2026","6am","Gillette Stadium","Boston"],
+["47","Group Stage","Panama","Croatia","Wednesday, 24 June 2026","9am","BMO Field","Toronto"],
+["48","Group Stage","Colombia","DR Congo","Wednesday, 24 June 2026","12pm","Estadio Akron","Guadalajara"],
+
+["49","Group Stage","Switzerland","Canada","Thursday, 25 June 2026","5am","BC Place","Vancouver"],
+["50","Group Stage","Bosnia and Herzegovina","Qatar","Thursday, 25 June 2026","5am","Lumen Field","Seattle"],
+["51","Group Stage","Scotland","Brazil","Thursday, 25 June 2026","8am","Hard Rock Stadium","Miami"],
+["52","Group Stage","Morocco","Haiti","Thursday, 25 June 2026","8am","Mercedes-Benz Stadium","Atlanta"],
+["53","Group Stage","Czechia","Mexico","Thursday, 25 June 2026","11am","Estadio Azteca","Mexico City"],
+["54","Group Stage","South Africa","South Korea","Thursday, 25 June 2026","11am","Estadio BBVA","Monterrey"],
+
+["55","Group Stage","Cote d’Ivoire","Ecuador","Friday, 26 June 2026","6am","Lincoln Financial Field","Philadelphia"],
+["56","Group Stage","Ecuador","Germany","Friday, 26 June 2026","6am","MetLife Stadium","New York"],
+["57","Group Stage","Japan","Sweden","Friday, 26 June 2026","9am","AT&T Stadium","Dallas"],
+["58","Group Stage","Tunisia","Netherlands","Friday, 26 June 2026","9am","Arrowhead Stadium","Kansas City"],
+["59","Group Stage","Turkiye","USA","Friday, 26 June 2026","12pm","SoFi Stadium","Los Angeles"],
+["60","Group Stage","Paraguay","Australia","Friday, 26 June 2026","12pm","Levi’s Stadium","Santa Clara"],
+
+["61","Group Stage","Norway","France","Saturday, 27 June 2026","5am","Gillette Stadium","Boston"],
+["62","Group Stage","Senegal","Iraq","Saturday, 27 June 2026","5am","BMO Field","Toronto"],
+["63","Group Stage","Cabo Verde","Saudi Arabia","Saturday, 27 June 2026","10am","NRG Stadium","Houston"],
+["64","Group Stage","Uruguay","Spain","Saturday, 27 June 2026","10am","Estadio Akron","Guadalajara"],
+["65","Group Stage","Egypt","Iran","Saturday, 27 June 2026","1pm","Lumen Field","Seattle"],
+["66","Group Stage","New Zealand","Belgium","Saturday, 27 June 2026","1pm","BC Place","Vancouver"],
+
+["67","Group Stage","Panama","England","Sunday, 28 June 2026","7am","MetLife Stadium","New York"],
+["68","Group Stage","Croatia","Ghana","Sunday, 28 June 2026","7am","Lincoln Financial Field","Philadelphia"],
+["69","Group Stage","Colombia","Portugal","Sunday, 28 June 2026","9:30am","Hard Rock Stadium","Miami"],
+["70","Group Stage","DR Congo","Uzbekistan","Sunday, 28 June 2026","9:30am","Mercedes-Benz Stadium","Atlanta"],
+["71","Group Stage","Algeria","Austria","Sunday, 28 June 2026","12pm","Arrowhead Stadium","Kansas City"],
+["72","Group Stage","Jordan","Argentina","Sunday, 28 June 2026","12pm","AT&T Stadium","Dallas"],
+
+["73","Round of 32","Runner-Up Group A","Runner-Up Group B","Monday, 29 June 2026","5am","SoFi Stadium","Los Angeles"],
+["74","Round of 32","Winner Group E","Third Place Qualifier","Tuesday, 30 June 2026","6:30am","Gillette Stadium","Boston"],
+["75","Round of 32","Winner Group F","Runner-Up Group C","Tuesday, 30 June 2026","11am","Estadio BBVA","Monterrey"],
+["76","Round of 32","Winner Group C","Runner-Up Group F","Tuesday, 30 June 2026","3am","NRG Stadium","Houston"],
+
+["77","Round of 32","Winner Group I","Third Place Qualifier","Wednesday, 1 July 2026","7am","MetLife Stadium","New York"],
+["78","Round of 32","Runner-Up Group E","Runner-Up Group I","Wednesday, 1 July 2026","3am","AT&T Stadium","Dallas"],
+["79","Round of 32","Winner Group A","Third Place Qualifier","Wednesday, 1 July 2026","11am","Estadio Azteca","Mexico City"],
+
+["80","Round of 32","Winner Group L","Third Place Qualifier","Thursday, 2 July 2026","2am","Mercedes-Benz Stadium","Atlanta"],
+["81","Round of 32","Winner Group D","Third Place Qualifier","Thursday, 2 July 2026","10am","Levi’s Stadium","Santa Clara"],
+["82","Round of 32","Winner Group G","Third Place Qualifier","Thursday, 2 July 2026","6am","Lumen Field","Seattle"],
+
+["83","Round of 32","Runner-Up Group K","Runner-Up Group L","Friday, 3 July 2026","9am","BMO Field","Toronto"],
+["84","Round of 32","Winner Group H","Runner-Up Group J","Friday, 3 July 2026","5am","SoFi Stadium","Los Angeles"],
+["85","Round of 32","Winner Group B","Third Place Qualifier","Friday, 3 July 2026","1pm","BC Place","Vancouver"],
+
+["86","Round of 32","Winner Group J","Runner-Up Group H","Saturday, 4 July 2026","8am","Hard Rock Stadium","Miami"],
+["87","Round of 32","Winner Group K","Third Place Qualifier","Saturday, 4 July 2026","11:30am","Arrowhead Stadium","Kansas City"],
+["88","Round of 32","Runner-Up Group D","Runner-Up Group G","Saturday, 4 July 2026","4am","AT&T Stadium","Dallas"],
+
+["89","Round of 16","Winner Match 74","Winner Match 77","Sunday, 5 July 2026","7am","Lincoln Financial Field","Philadelphia"],
+["90","Round of 16","Winner Match 73","Winner Match 75","Sunday, 5 July 2026","3am","NRG Stadium","Houston"],
+["91","Round of 16","Winner Match 76","Winner Match 78","Monday, 6 July 2026","6am","MetLife Stadium","New York"],
+["92","Round of 16","Winner Match 79","Winner Match 80","Monday, 6 July 2026","10am","Estadio Azteca","Mexico City"],
+["93","Round of 16","Winner Match 83","Winner Match 84","Tuesday, 7 July 2026","5am","AT&T Stadium","Dallas"],
+["94","Round of 16","Winner Match 81","Winner Match 82","Tuesday, 7 July 2026","10am","Lumen Field","Seattle"],
+["95","Round of 16","Winner Match 86","Winner Match 88","Wednesday, 8 July 2026","2am","Mercedes-Benz Stadium","Atlanta"],
+["96","Round of 16","Winner Match 85","Winner Match 87","Wednesday, 8 July 2026","6am","BC Place","Vancouver"],
+
+["97","Quarter-Finals","Winner Match 89","Winner Match 90","Friday, 10 July 2026","6am","Gillette Stadium","Boston"],
+["98","Quarter-Finals","Winner Match 93","Winner Match 94","Saturday, 11 July 2026","5am","SoFi Stadium","Los Angeles"],
+["99","Quarter-Finals","Winner Match 91","Winner Match 92","Sunday, 12 July 2026","7am","Hard Rock Stadium","Miami"],
+["100","Quarter-Finals","Winner Match 95","Winner Match 96","Sunday, 12 July 2026","11am","Arrowhead Stadium","Kansas City"],
+
+["101","Semi-Finals","Winner Match 97","Winner Match 98","Wednesday, 15 July 2026","5am","AT&T Stadium","Dallas"],
+["102","Semi-Finals","Winner Match 99","Winner Match 100","Thursday, 16 July 2026","5am","Mercedes-Benz Stadium","Atlanta"],
+
+["103","Third-Place Game","Loser Match 101","Loser Match 102","Sunday, 19 July 2026","7am","Hard Rock Stadium","Miami"],
+["104","World Cup Final","Winner Match 101","Winner Match 102","Monday, 20 July 2026","7am","MetLife Stadium","New York"]
+];
+
+/* =======================
+   FUNCTIONS
+======================= */
+function flagImg(name){
+    const code = teams[name];
+    return code ? `<img src="https://flagcdn.com/w40/${code}.png">` : "";
+}
+
+function teamLabel(name){
+    return `<span class="team">${flagImg(name)} ${name}</span>`;
+}
+
+function getGroup(text){
+    const m = text.match(/Group ([A-L])/i);
+    return m ? m[1] : null;
+}
+
+/* =======================
+   RENDER (GROUP SHOWN)
+======================= */
+function render(){
+    const grid = document.getElementById("grid");
+    const search = document.getElementById("search").value.toLowerCase();
+    const filter = document.getElementById("filter").value;
+
+    grid.innerHTML = "";
+
+    matches
+    .filter(m => (!filter || m[1] === filter) && m.join(" ").toLowerCase().includes(search))
+    .forEach(m => {
+
+        let stageLabel = m[1];
+
+        if(m[1] === "Group Stage"){
+            const g = getGroup(m[2]) || getGroup(m[3]);
+            if(g) stageLabel = `Group ${g}`;
+        }
+
+        grid.innerHTML += `
+        <div class="card">
+
+            <div class="top">
+                <span>Match ${m[0]}</span>
+                <span class="badge">${stageLabel}</span>
+            </div>
+
+            <div class="match">
+                ${teamLabel(m[2])} - ${teamLabel(m[3])}
+            </div>
+
+            <div class="meta">
+                📅 ${m[4]} • 🕒 ${m[5]}<br>
+                📍 ${m[6]} — ${m[7]}
+            </div>
+
+        </div>`;
     });
-  
-  
-    // Add navigation control and scale
-  
-var nav = new maplibregl.NavigationControl();
-map.addControl(nav, 'top-left');
+}
 
-var scale = new maplibregl.ScaleControl({
-maxWidth: 80,
-unit: 'metric'
-});
-map.addControl(scale);
+document.getElementById("search").addEventListener("input", render);
+document.getElementById("filter").addEventListener("change", render);
+
+render();
+
 </script>
- 
+
 </body>
 </html>
-
